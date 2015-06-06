@@ -36,12 +36,20 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "stm3210e_eval.h"
+#include "stm3210e_bit3.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+
+/* Definition for USARTx's NVIC */
+#define USARTx_DMA_TX_Channel		DMA1_Channel7
+#define USARTx_DMA_RX_Channel		DMA1_Channel6
+#define USARTx_DMA_TX_IRQn			DMA1_Channel7_IRQn
+#define USARTx_DMA_RX_IRQn			DMA1_Channel6_IRQn
+#define USARTx_DMA_TX_IRQHandler	DMA1_Channel7_IRQHandler
+#define	USARTx_DMA_RX_IRQHandler	DMA1_Channel6_IRQHandler
 
 #ifdef __cplusplus
 }

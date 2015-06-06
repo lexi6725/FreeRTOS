@@ -72,7 +72,7 @@
  * PORT_ARM_CORTEX_A9					15		No			Any
  *****************************************************************************/
 
-#ifndef WIN32
+#ifndef PORT_ARM_CortexM
 	// Set the port setting here!
 	#define SELECTED_PORT PORT_NOT_SET
 
@@ -80,8 +80,8 @@
 		#error "You need to define SELECTED_PORT here!"
 	#endif
 #else
-	// For Win32 demo projects this is set automatically
-	#define SELECTED_PORT PORT_Win32	
+	// For PORT_ARM_CortexM demo projects this is set automatically
+	#define SELECTED_PORT PORT_ARM_CortexM	
 #endif
 
 /******************************************************************************

@@ -106,32 +106,33 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "main.h"
 
 /* Library includes. */
 #include "stm32f1xx_it.h"
+#include "stm32f1xx_hal.h"
 
 /* Demo app includes. */
 #include "partest.h"
+#include "flash.h"
+#include "serial.h"
 
 /* Task priorities. */
-#define mainQUEUE_POLL_PRIORITY				( tskIDLE_PRIORITY + 2 )
-#define mainCHECK_TASK_PRIORITY				( tskIDLE_PRIORITY + 3 )
-#define mainSEM_TEST_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainBLOCK_Q_PRIORITY				( tskIDLE_PRIORITY + 2 )
-#define mainCREATOR_TASK_PRIORITY           ( tskIDLE_PRIORITY + 3 )
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainCOM_TEST_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainINTEGER_TASK_PRIORITY           ( tskIDLE_PRIORITY )
+
 
 /*-----------------------------------------------------------*/
+void SystemClock_Config(void);
 
 int main( void )
 {
 #ifdef DEBUG
   debug();
 #endif
-	SystemInit();
-	prvSetupHardware();
+	HAL_Init();
+	SystemClock_Config();
+	vParTestInitialise();
+	//xSerialPortInitMinimal(115200, 20);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 
@@ -143,71 +144,53 @@ int main( void )
 	return 0;
 }
 
-/*-----------------------------------------------------------*/
-
-static void prvSetupHardware( void )
+/**
+  * @brief  System Clock Configuration
+  *         The system Clock is configured as follow : 
+  *            System Clock source            = PLL (HSE)
+  *            SYSCLK(Hz)                     = 72000000
+  *            HCLK(Hz)                       = 72000000
+  *            AHB Prescaler                  = 1
+  *            APB1 Prescaler                 = 2
+  *            APB2 Prescaler                 = 1
+  *            HSE Frequency(Hz)              = 8000000
+  *            HSE PREDIV1                    = 1
+  *            PLLMUL                         = 9
+  *            Flash Latency(WS)              = 2
+  * @param  None
+  * @retval None
+  */
+void SystemClock_Config(void)
 {
-	/* Start with the clocks in their expected state. */
-	RCC_DeInit();
+  RCC_ClkInitTypeDef clkinitstruct = {0};
+  RCC_OscInitTypeDef oscinitstruct = {0};
+  
+  /* Enable HSE Oscillator and activate PLL with HSE as source */
+  oscinitstruct.OscillatorType  = RCC_OSCILLATORTYPE_HSE;
+  oscinitstruct.HSEState        = RCC_HSE_ON;
+  oscinitstruct.HSEPredivValue  = RCC_HSE_PREDIV_DIV1;
+  oscinitstruct.PLL.PLLState    = RCC_PLL_ON;
+  oscinitstruct.PLL.PLLSource   = RCC_PLLSOURCE_HSE;
+  oscinitstruct.PLL.PLLMUL      = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&oscinitstruct)!= HAL_OK)
+  {
+    /* Initialization Error */
+    while(1);
+  }
 
-	/* Enable HSE (high speed external clock). */
-	RCC_HSEConfig( RCC_HSE_ON );
-
-	/* Wait till HSE is ready. */
-	while( RCC_GetFlagStatus( RCC_FLAG_HSERDY ) == RESET )
-	{
-	}
-
-	/* 2 wait states required on the flash. */
-	*( ( unsigned long * ) 0x40022000 ) = 0x02;
-
-	/* HCLK = SYSCLK */
-	RCC_HCLKConfig( RCC_SYSCLK_Div1 );
-
-	/* PCLK2 = HCLK */
-	RCC_PCLK2Config( RCC_HCLK_Div1 );
-
-	/* PCLK1 = HCLK/2 */
-	RCC_PCLK1Config( RCC_HCLK_Div2 );
-
-	/* PLLCLK = 8MHz * 9 = 72 MHz. */
-	RCC_PLLConfig( RCC_PLLSource_HSE_Div1, RCC_PLLMul_9 );
-
-	/* Enable PLL. */
-	RCC_PLLCmd( ENABLE );
-
-	/* Wait till PLL is ready. */
-	while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-	{
-	}
-
-	/* Select PLL as system clock source. */
-	RCC_SYSCLKConfig( RCC_SYSCLKSource_PLLCLK );
-
-	/* Wait till PLL is used as system clock source. */
-	while( RCC_GetSYSCLKSource() != 0x08 )
-	{
-	}
-
-	/* Enable GPIOA, GPIOB, GPIOC, GPIOD, GPIOE and AFIO clocks */
-	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |RCC_APB2Periph_GPIOC
-							| RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | RCC_APB2Periph_AFIO, ENABLE );
-
-	/* SPI2 Periph clock enable */
-	RCC_APB1PeriphClockCmd( RCC_APB1Periph_SPI2, ENABLE );
-
-
-	/* Set the Vector Table base address at 0x08000000 */
-	NVIC_SetVectorTable( NVIC_VectTab_FLASH, 0x0 );
-
-	NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
-
-	/* Configure HCLK clock as SysTick clock source. */
-	SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
-
-	vParTestInitialise();
+  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
+     clocks dividers */
+  clkinitstruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+  clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  clkinitstruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  clkinitstruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV2;  
+  if (HAL_RCC_ClockConfig(&clkinitstruct, FLASH_LATENCY_2)!= HAL_OK)
+  {
+    /* Initialization Error */
+    while(1);
+  }
 }
-/*-----------------------------------------------------------*/
 
 #ifdef  DEBUG
 /* Keep the linker happy. */

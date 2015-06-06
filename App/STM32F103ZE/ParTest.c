@@ -77,10 +77,9 @@
 #include "partest.h"
 
 /* Library includes. */
-#include "stm32f10x_lib.h"
+#include "stm32f1xx_hal_conf.h"
 
-#define partstMAX_OUTPUT_LED	( 4 )
-#define partstFIRST_LED			GPIO_Pin_6
+#define partstMAX_OUTPUT_LED	( 2 )
 
 static unsigned short usOutputValue = 0;
 
@@ -90,11 +89,17 @@ void vParTestInitialise( void )
 {
 GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure PC.06, PC.07, PC.08 and PC.09 as output push-pull */
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init( GPIOC, &GPIO_InitStructure );
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOG_CLK_ENABLE();
+	
+	/* Configure PD.13 as output push-pull */
+	GPIO_InitStructure.Pin =  GPIO_PIN_13;
+	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+	HAL_GPIO_Init( GPIOD, &GPIO_InitStructure );
+
+	GPIO_InitStructure.Pin = GPIO_PIN_14;
+	HAL_GPIO_Init( GPIOG, &GPIO_InitStructure);
 }
 /*-----------------------------------------------------------*/
 
@@ -106,19 +111,20 @@ unsigned short usBit;
 	{
 		if( uxLED < partstMAX_OUTPUT_LED )
 		{
-			usBit = partstFIRST_LED << uxLED;
-
-			if( xValue == pdFALSE )
+			if (xValue)
 			{
-				usBit ^= ( unsigned short ) 0xffff;
-				usOutputValue &= usBit;
+				if (uxLED == 0)
+					HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+				else
+					HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 			}
 			else
 			{
-				usOutputValue |= usBit;
+				if (uxLED == 0)
+					HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+				else
+					HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 			}
-
-			GPIO_Write( GPIOC, usOutputValue );
 		}	
 	}
 	xTaskResumeAll();
@@ -128,23 +134,36 @@ unsigned short usBit;
 void vParTestToggleLED( unsigned portBASE_TYPE uxLED )
 {
 unsigned short usBit;
+unsigned char state;
 
 	vTaskSuspendAll();
 	{
 		if( uxLED < partstMAX_OUTPUT_LED )
 		{
-			usBit = partstFIRST_LED << uxLED;
-
-			if( usOutputValue & usBit )
+			/*if ( uxLED == 0)
 			{
-				usOutputValue &= ~usBit;
+				usBit = GPIO_PIN_13;		// D13: LED D5
+				state = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_13);
 			}
 			else
 			{
-				usOutputValue |= usBit;
+				usBit = GPIO_PIN_14;		// G14: LED D2
+				state = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_14);
 			}
 
-			GPIO_Write( GPIOC, usOutputValue );
+			if (state)
+			{
+				state = GPIO_PIN_RESET;
+			}
+			else
+			{
+				state = GPIO_PIN_SET;
+			}*/
+
+			if (uxLED == 0)
+				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+			else
+				HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 		}
 	}
 	xTaskResumeAll();

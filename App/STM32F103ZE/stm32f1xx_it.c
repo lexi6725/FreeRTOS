@@ -27,7 +27,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_it.h"
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -115,7 +115,7 @@ void DebugMon_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  osSystickHandler();
+  xPortSysTickHandler();
 
   HAL_IncTick();
 }

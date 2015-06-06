@@ -10,10 +10,10 @@
 # Normal rules
 #
 
-/PROJS/Debug
-/PROJS/settings
+/PRJS/STM32F103ZE/Debug
+/PRJS/STM32F103ZE/settings
 /si
-/PROJS/Released
+/PRJS/STM32F103ZE/Released
 
 *.pbi
 *.cout

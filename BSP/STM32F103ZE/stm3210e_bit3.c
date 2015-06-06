@@ -37,7 +37,7 @@
   */
   
 /* Includes ------------------------------------------------------------------*/
-#include "stm3210e_eval.h"
+#include "stm3210e_bit3.h"
 
 /** @addtogroup BSP
   * @{
