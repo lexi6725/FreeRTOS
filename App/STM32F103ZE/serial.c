@@ -98,7 +98,7 @@
 static QueueHandle_t xRxedChars;
 static QueueHandle_t xCharsForTx;
 
-UART_HandleTypeDef	UartHandle;
+USART_HandleTypeDef	UsartHandle;
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
 /*-----------------------------------------------------------*/
@@ -149,19 +149,19 @@ xComPortHandle xReturn;
 		HAL_NVIC_EnableIRQ(USART1_IRQn);
 		#endif
 		/* ##-4- Configure USART1 Init Structure */
-		UartHandle.Instance			= USART1;
-		UartHandle.Init.BaudRate	= 115200;
-		UartHandle.Init.WordLength	= UART_WORDLENGTH_8B;
-		UartHandle.Init.StopBits	= UART_STOPBITS_1;
-		UartHandle.Init.Parity		= UART_PARITY_NONE;
-		UartHandle.Init.HwFlowCtl	= UART_HWCONTROL_NONE;
-		UartHandle.Init.Mode		= UART_MODE_TX_RX;
+		UsartHandle.Instance		= USART1;
+		UsartHandle.Init.BaudRate	= 115200;
+		UsartHandle.Init.WordLength	= UART_WORDLENGTH_8B;
+		UsartHandle.Init.StopBits	= UART_STOPBITS_1;
+		UsartHandle.Init.Parity		= UART_PARITY_NONE;
+		UsartHandle.Init.HwFlowCtl	= UART_HWCONTROL_NONE;
+		UsartHandle.Init.Mode		= UART_MODE_TX_RX;
 
-		if (HAL_UART_DeInit(&UartHandle) != HAL_OK)
+		if (HAL_USART_DeInit(&UsartHandle) != HAL_OK)
 		{
 			while(1);
 		}
-		if (HAL_UART_Init(&UartHandle) != HAL_OK)
+		if (HAL_USART_Init(&UsartHandle) != HAL_OK)
 		{
 			while(1);		// Error
 		}
@@ -214,12 +214,9 @@ signed char *pxNext;
 	/* Send each character in the string, one at a time. */
 	pxNext = ( signed char * ) pcString;
 
-	if (HAL_UART_Transmit_DMA(&UartHandle, (uint8_t *)pcString, usStringLength) != HAL_OK)
+	if (HAL_UART_Transmit_IT(&UartHandle, (uint8_t *)pcString, usStringLength) != HAL_OK)
 	{
 		while(1);
-	}
-	while (HAL_UART_GetState(&UartHandle) != HAL_UART_STATE_READY)
-	{
 	}
 	//while( *pxNext )
 	//{
@@ -296,46 +293,22 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 	/* Enable GPIOA Clock */
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	/* Enable DMA Clock */
-	__HAL_RCC_DMA1_CLK_ENABLE();
-
 	/* ##-2- Configure Peripheral GPIO */
 	/* Configure USART1 Rx (PA10) as input floating */
 	GPIO_InitStructure.Pin = GPIO_PIN_10;
-	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_INPUT;
 	GPIO_InitStructure.Pull = GPIO_NOPULL;
 	GPIO_InitStructure.Speed     = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
 	
 	/* Configure USART1 Tx (PA9) as alternate function push-pull */
-	GPIO_InitStructure.Pin 	= GPIO_PIN_9;
-	GPIO_InitStructure.Mode	= GPIO_MODE_AF_PP;
-	GPIO_InitStructure.Pull = GPIO_PULLUP;
+	GPIO_InitStructure.Pin 		= GPIO_PIN_9;
+	GPIO_InitStructure.Mode		= GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Pull	 	= GPIO_PULLUP;
+	GPIO_InitStructure.Speed    = GPIO_SPEED_HIGH;
 	HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
 
-	/* ##-3- Configure the DMA */
-	hdma_tx.Instance			= USARTx_DMA_TX_Channel;
-	hdma_tx.Init.Direction		= DMA_MEMORY_TO_PERIPH;
-	hdma_tx.Init.PeriphInc		= DMA_PINC_DISABLE;
-	hdma_tx.Init.MemInc			= DMA_MINC_ENABLE;
-	hdma_tx.Init.PeriphDataAlignment	= DMA_PDATAALIGN_BYTE;
-	hdma_tx.Init.MemDataAlignment		= DMA_MDATAALIGN_BYTE;
-	hdma_tx.Init.Mode			= DMA_NORMAL;
-	hdma_tx.Init.Priority		= DMA_PRIORITY_LOW;
-
-	HAL_DMA_Init(&hdma_tx);
-
-	/* Associate the initialized DMA handle to the UART handle */
-	__HAL_LINKDMA(huart, hdmatx, hdma_tx);
-
-
-	/* ##-4- Configure the NVIC for DMA */
-	/* NVIC Configure for DMA transfer complete interrupt */
-	HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 0, 1);
-	HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
-	HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
-	
+	/* ##-4- Configure the NVIC for USART */	
 	HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 	

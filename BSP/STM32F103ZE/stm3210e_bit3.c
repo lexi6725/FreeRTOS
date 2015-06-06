@@ -99,14 +99,10 @@ typedef struct
  * @brief LED variables
  */
 GPIO_TypeDef* LED_PORT[LEDn] = {LED1_GPIO_PORT, 
-                                LED2_GPIO_PORT, 
-                                LED3_GPIO_PORT,
-                                LED4_GPIO_PORT};
+                                LED2_GPIO_PORT};
 
 const uint16_t LED_PIN[LEDn] = {LED1_PIN, 
-                                LED2_PIN, 
-                                LED3_PIN,
-                                LED4_PIN};
+                                LED2_PIN};
 
 /**
  * @brief BUTTON variables
@@ -1255,36 +1251,36 @@ uint32_t FLASH_SPI_IO_ReadID(void)
 #ifdef HAL_I2C_MODULE_ENABLED
 /********************************* LINK I2C TEMPERATURE SENSOR *****************************/
 /**
-  * @brief  Initializes peripherals used by the I2C Temperature Sensor driver.
+  * @brief  Initializes peripherals used by the I2C  Sensor driver.
   * @retval None
   */
-void TSENSOR_IO_Init(void)
+void HMC5883L_IO_Init(void)
 {
   I2Cx_Init();
 }
 
 /**
-  * @brief  Writes one byte to the TSENSOR.
+  * @brief  Writes one byte to the HMC5883L.
   * @param  DevAddress: Target device address
   * @param  pBuffer: Pointer to data buffer
   * @param  WriteAddr: TSENSOR's internal address to write to.
   * @param  Length: Number of data to write
   * @retval None
   */
-void TSENSOR_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length)
+void HMC5883L_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length)
 {
   I2Cx_WriteBuffer(DevAddress, WriteAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
 
 /**
-  * @brief  Reads one byte from the TSENSOR.
+  * @brief  Reads one byte from the HMC5883L.
   * @param  DevAddress: Target device address
   * @param  pBuffer : pointer to the buffer that receives the data read from the TSENSOR.
   * @param  ReadAddr : TSENSOR's internal address to read from.
   * @param  Length: Number of data to read
   * @retval None
   */
-void TSENSOR_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length)
+void HMC5883L_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length)
 {
   I2Cx_ReadBuffer(DevAddress, ReadAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
@@ -1295,7 +1291,7 @@ void TSENSOR_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, ui
   * @param  Trials: Number of trials
 * @retval HAL status
 */
-uint16_t TSENSOR_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
+uint16_t HMC5883L_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 { 
   return (I2Cx_IsDeviceReady(DevAddress, Trials));
 }

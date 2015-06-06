@@ -88,7 +88,7 @@
 #include "task.h"
 
 /* Demo program include files. */
-#include "partest.h"
+#include "stm3210e_bit3.h"
 #include "flash.h"
 
 #define ledSTACK_SIZE		configMINIMAL_STACK_SIZE
@@ -151,11 +151,11 @@ UBaseType_t uxLED;
 	{
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
-		vParTestToggleLED( uxLED );
+		BSP_LED_Toggle( uxLED );
 
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
-		vParTestToggleLED( uxLED );
+		BSP_LED_Toggle( uxLED );
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

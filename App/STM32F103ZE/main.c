@@ -101,6 +101,7 @@
 
 /* Standard includes. */
 #include <stdio.h>
+#include <math.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -113,13 +114,15 @@
 #include "stm32f1xx_hal.h"
 
 /* Demo app includes. */
-#include "partest.h"
+#include "stm3210e_bit3.h"
 #include "flash.h"
 #include "serial.h"
+#include "hmc5883l.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
 
+static portTASK_FUNCTION_PROTO( vHMC5883LTask, pvParameters );
 
 /*-----------------------------------------------------------*/
 void SystemClock_Config(void);
@@ -131,10 +134,12 @@ int main( void )
 #endif
 	HAL_Init();
 	SystemClock_Config();
-	vParTestInitialise();
+	BSP_LED_Init(LED1);
+	BSP_LED_Init(LED2);
 	//xSerialPortInitMinimal(115200, 20);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
+	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -190,6 +195,47 @@ void SystemClock_Config(void)
     /* Initialization Error */
     while(1);
   }
+}
+
+static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
+{
+	TickType_t xRate, xLastTime;
+	uint8_t isConnect = 0;
+	HMC_Measure Measure_data;
+
+	/* The parameters are not used. */
+	( void ) pvParameters;
+	
+	xRate = 500;
+	xRate /= portTICK_PERIOD_MS;
+	
+	/* We need to initialise xLastFlashTime prior to the first call to 
+	vTaskDelayUntil(). */
+	xLastTime = xTaskGetTickCount();
+
+	if (HMC5883L_IsReady(0x3C, 10))
+	{
+		HMC5883L_Init(0x3C);
+		isConnect = 1;
+	}
+
+	for(;;)
+	{
+		/* Delay for half the flash period then turn the LED on. */
+		vTaskDelayUntil( &xLastTime, xRate );
+		if (isConnect)
+		{
+			HMC5883L_ReadAngle(0x3C, &Measure_data);
+			Measure_data.angle = atan2((double)Measure_data.y, (double)Measure_data.x) * (180/3.1415926) + 180;
+			Measure_data.angle *= 10;
+		}
+	}
+}
+
+
+static void Error_Handle(void)
+{
+	BSP_LED_On(LED1);
 }
 
 #ifdef  DEBUG

@@ -70,13 +70,9 @@ typedef enum
 {
   LED1 = 0,
   LED2 = 1,
-  LED3 = 2,
-  LED4 = 3,
 
-  LED_GREEN  = LED1,
-  LED_ORANGE = LED2,
-  LED_RED    = LED3,
-  LED_BLUE   = LED4
+  LED_SYS_STATUS  = LED1,
+  LED_COMM_STATUS = LED2,
 
 } Led_TypeDef;
 
@@ -153,39 +149,23 @@ typedef enum
 /** @addtogroup STM3210E_EVAL_LED
   * @{
   */
-#define LEDn                             4
+#define LEDn                             2
 
-#define LED1_PIN                         GPIO_PIN_6             /* PF.06*/
-#define LED1_GPIO_PORT                   GPIOF
-#define LED1_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOF_CLK_ENABLE()
-#define LED1_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOF_CLK_DISABLE()
+#define LED1_PIN                         GPIO_PIN_13             /* PD.13*/
+#define LED1_GPIO_PORT                   GPIOD
+#define LED1_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOD_CLK_ENABLE()
+#define LED1_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOD_CLK_DISABLE()
   
-#define LED2_PIN                         GPIO_PIN_7             /* PF.07*/
-#define LED2_GPIO_PORT                   GPIOF
-#define LED2_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOF_CLK_ENABLE()
-#define LED2_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOF_CLK_DISABLE()
-
-
-#define LED3_PIN                         GPIO_PIN_8            /* PF.08*/
-#define LED3_GPIO_PORT                   GPIOF
-#define LED3_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOF_CLK_ENABLE()
-#define LED3_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOF_CLK_DISABLE()
-
-
-#define LED4_PIN                         GPIO_PIN_9            /* PF.09*/
-#define LED4_GPIO_PORT                   GPIOF
-#define LED4_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOF_CLK_ENABLE()
-#define LED4_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOF_CLK_DISABLE()
+#define LED2_PIN                         GPIO_PIN_14             /* PG.14*/
+#define LED2_GPIO_PORT                   GPIOG
+#define LED2_GPIO_CLK_ENABLE()           __HAL_RCC_GPIOG_CLK_ENABLE()
+#define LED2_GPIO_CLK_DISABLE()          __HAL_RCC_GPIOG_CLK_DISABLE()
 
 #define LEDx_GPIO_CLK_ENABLE(__LED__) do { if ((__LED__) == LED1) LED1_GPIO_CLK_ENABLE(); else\
-                                           if ((__LED__) == LED2) LED2_GPIO_CLK_ENABLE(); else \
-                                           if ((__LED__) == LED3) LED3_GPIO_CLK_ENABLE(); else\
-                                           if ((__LED__) == LED4) LED4_GPIO_CLK_ENABLE();} while(0)
+                                           if ((__LED__) == LED2) LED2_GPIO_CLK_ENABLE();} while(0)
 
 #define LEDx_GPIO_CLK_DISABLE(__LED__)   (((__LED__) == LED1) ? LED1_GPIO_CLK_DISABLE() :\
-                                          ((__LED__) == LED2) ? LED2_GPIO_CLK_DISABLE() :\
-                                          ((__LED__) == LED3) ? LED3_GPIO_CLK_DISABLE() :\
-                                          ((__LED__) == LED4) ? LED4_GPIO_CLK_DISABLE() : 0 )
+                                          ((__LED__) == LED2) ? LED2_GPIO_CLK_DISABLE() : 0 )
 
 /**
   * @}
@@ -514,6 +494,13 @@ void                    BSP_COM_Init(COM_TypeDef COM, UART_HandleTypeDef* huart)
 #endif /* HAL_UART_MODULE_ENABLED */
 uint8_t                 BSP_JOY_Init(JOYMode_TypeDef Joy_Mode);
 JOYState_TypeDef        BSP_JOY_GetState(void);
+
+uint16_t HMC5883L_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
+void HMC5883L_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length);
+void HMC5883L_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length);
+void HMC5883L_IO_Init(void);
+
+
 
 /**
   * @}
