@@ -239,6 +239,7 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 			Measure_data.angle = atan2((double)Measure_data.y, (double)Measure_data.x) * (180/3.1415926) + 180;
 			Measure_data.angle *= 10;
 			x = abs(Measure_data.x);
+
 			buf[0] = 'x';
 			buf[1] = '=';
 			if (Measure_data.x > 0)
