@@ -144,6 +144,7 @@ int main( void )
 	rate.left_rate	= 20;
 	rate.right_rate = 80;
 	PWM_TIM_Config(100000, rate);
+	UART_Init(115200);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
@@ -222,12 +223,7 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 	vTaskDelayUntil(). */
 	xLastTime = xTaskGetTickCount();
 
-	if (HMC5883L_IsReady(0x3C, 10))
-	{
-		HMC5883L_Init(0x3C);
-		UART_Init(115200);
-		isConnect = 1;
-	}
+	isConnect = 0;
 
 	for(;;)
 	{
@@ -236,10 +232,8 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 		if (isConnect)
 		{
 			HMC5883L_ReadAngle(0x3C, &Measure_data);
-			Measure_data.angle = atan2((double)Measure_data.y, (double)Measure_data.x) * (180/3.1415926) + 180;
-			Measure_data.angle *= 10;
-			x = abs(Measure_data.x);
 
+			x = abs(Measure_data.x);
 			buf[0] = 'x';
 			buf[1] = '=';
 			if (Measure_data.x > 0)
@@ -284,7 +278,16 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 			buf[8] = '\n';
 			UART_PutString(buf, 9);
 			BSP_LED_Toggle(LED2);
-			vTaskDelayUntil( &xLastTime, xRate );
+		}
+		else
+		{
+			vTaskDelayUntil(&xLastTime, 1000-xRate);
+			if (HMC5883L_IsReady(0x3C, 10))
+			{
+				HMC5883L_Init(0x3C);
+				isConnect = 1;
+			}
+			UART_PutString("HMC5883L not Connect ...\n", 25);
 		}
 	}
 }

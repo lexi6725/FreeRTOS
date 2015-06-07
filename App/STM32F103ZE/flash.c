@@ -90,6 +90,7 @@
 /* Demo program include files. */
 #include "stm3210e_bit3.h"
 #include "flash.h"
+#include "serial.h"
 
 #define ledSTACK_SIZE		configMINIMAL_STACK_SIZE
 #define ledNUMBER_OF_LEDS	( 1 )
@@ -152,10 +153,12 @@ UBaseType_t uxLED;
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( uxLED );
+		UART_PutString("LED2 is Run, On\n", 16);
 
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( uxLED );
+		UART_PutString("LED2 is Run, Off\n", 17);
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 
