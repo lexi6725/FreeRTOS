@@ -81,6 +81,7 @@
 #include "stm32f1xx_hal_dma.h"
 #include "stm32f1xx_hal_uart.h"
 #include "stm32f1xx_hal_conf.h"
+#include "stm32f1xx_hal.h"
 
 /* Demo application includes. */
 #include "serial.h"
@@ -98,233 +99,68 @@
 static QueueHandle_t xRxedChars;
 static QueueHandle_t xCharsForTx;
 
-USART_HandleTypeDef	UsartHandle;
+UART_HandleTypeDef	UartHandle;
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-
-/*-----------------------------------------------------------*/
-
-/* UART interrupt handler. */
-void vUARTInterruptHandler( void );
-
-/*-----------------------------------------------------------*/
-
-/*
- * See the serial2.h header file.
- */
-xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
-{
-xComPortHandle xReturn;
-
-	/* Create the queues used to hold Rx/Tx characters. */
-	//xRxedChars = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
-	//xCharsForTx = xQueueCreate( uxQueueLength + 1, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
-	
-	/* If the queue/semaphore was created correctly then setup the serial port
-	hardware. */
-	//if( ( xRxedChars != serINVALID_QUEUE ) && ( xCharsForTx != serINVALID_QUEUE ) )
-	{
-		/* ##-1- Enable peripherals and GPIO Clocks */
-		/* Enable USART1 clock */
-		#if 0
-		__HAL_RCC_USART1_CLK_ENABLE();
-
-		/* Enable GPIOA Clock */
-		__HAL_RCC_GPIOA_CLK_ENABLE();
-
-		/* ##-2- Configure Peripheral GPIO */
-		/* Configure USART1 Rx (PA10) as input floating */
-		GPIO_InitStructure.Pin = GPIO_PIN_10;
-		GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
-		GPIO_InitStructure.Pull = GPIO_PULLUP;
-		GPIO_InitStructure.Speed     = GPIO_SPEED_HIGH;
-		HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
-		
-		/* Configure USART1 Tx (PA9) as alternate function push-pull */
-		GPIO_InitStructure.Pin 	= GPIO_PIN_9;
-		GPIO_InitStructure.Mode	= GPIO_MODE_AF_PP;
-		HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
-
-		/* ##-3- Configure the NVIC for UART */
-		HAL_NVIC_SetPriority(USART1_IRQn, 4, 0);
-		HAL_NVIC_EnableIRQ(USART1_IRQn);
-		#endif
-		/* ##-4- Configure USART1 Init Structure */
-		UsartHandle.Instance		= USART1;
-		UsartHandle.Init.BaudRate	= 115200;
-		UsartHandle.Init.WordLength	= UART_WORDLENGTH_8B;
-		UsartHandle.Init.StopBits	= UART_STOPBITS_1;
-		UsartHandle.Init.Parity		= UART_PARITY_NONE;
-		UsartHandle.Init.HwFlowCtl	= UART_HWCONTROL_NONE;
-		UsartHandle.Init.Mode		= UART_MODE_TX_RX;
-
-		if (HAL_USART_DeInit(&UsartHandle) != HAL_OK)
-		{
-			while(1);
-		}
-		if (HAL_USART_Init(&UsartHandle) != HAL_OK)
-		{
-			while(1);		// Error
-		}
-				
-	}
-	//else
-	//{
-	//	xReturn = ( xComPortHandle ) 0;
-	//}
-
-	/* This demo file only supports a single port but we have to return
-	something to comply with the standard demo header file. */
-	return xReturn;
-}
-/*-----------------------------------------------------------*/
-#if 0
-signed portBASE_TYPE xSerialGetChar( xComPortHandle pxPort, signed char *pcRxedChar, TickType_t xBlockTime )
-{
-	/* The port handle is not required as this driver only supports one port. */
-	( void ) pxPort;
-
-	/* Get the next character from the buffer.  Return false if no characters
-	are available, or arrive before xBlockTime expires. */
-	if( xQueueReceive( xRxedChars, pcRxedChar, xBlockTime ) )
-	{
-		return pdTRUE;
-	}
-	else
-	{
-		return pdFALSE;
-	}
-}
-#endif
-/*-----------------------------------------------------------*/
-
-void vSerialPutString( xComPortHandle pxPort, const signed char * const pcString, unsigned short usStringLength )
-{
-signed char *pxNext;
-
-	/* A couple of parameters that this port does not use. */
-	( void ) usStringLength;
-	( void ) pxPort;
-
-	/* NOTE: This implementation does not handle the queue being full as no
-	block time is used! */
-
-	/* The port handle is not required as this driver only supports UART1. */
-	( void ) pxPort;
-
-	/* Send each character in the string, one at a time. */
-	pxNext = ( signed char * ) pcString;
-
-	if (HAL_UART_Transmit_IT(&UartHandle, (uint8_t *)pcString, usStringLength) != HAL_OK)
-	{
-		while(1);
-	}
-	//while( *pxNext )
-	//{
-	//	xSerialPutChar( pxPort, *pxNext, serTX_BLOCK_TIME );
-	//	pxNext++;
-	//}
-}
-/*-----------------------------------------------------------*/
-#if 0
-signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar, TickType_t xBlockTime )
-{
-signed portBASE_TYPE xReturn;
-
-	if( xQueueSend( xCharsForTx, &cOutChar, xBlockTime ) == pdPASS )
-	{
-		xReturn = pdPASS;
-		__HAL_UART_ENABLE_IT(&UartHandle, UART_IT_TXE);
-		//HAL_UART_Transmit_IT(&UartHandle,(uint8_t *)&cOutChar, 1);
-	}
-	else
-	{
-		xReturn = pdFAIL;
-	}
-
-	return xReturn;
-}
-#endif
-/*-----------------------------------------------------------*/
-
-void vSerialClose( xComPortHandle xPort )
-{
-	/* Not supported as not required by the demo application. */
-}
-/*-----------------------------------------------------------*/
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	//char cChar;
-
-	/*if ((HAL_UART_Receive_IT(huart,(uint8_t *)&cChar, 1)) == HAL_OK)
-	{
-		xQueueSendFromISR( xRxedChars, &cChar, &xHigherPriorityTaskWoken);
-	}*/
-	
-	vParTestToggleLED(1);
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-	/*char cChar;
-	if (xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken) == pdTRUE)
-	{
-		HAL_UART_Transmit_IT(huart,(uint8_t *)&cChar, 1);
-	}
-	else
-	{
-		__HAL_UART_DISABLE_IT(huart, UART_IT_TXE);
-	}*/
-	vParTestToggleLED(1);
-}	
-
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
-{
-	while(1);
-}
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	static DMA_HandleTypeDef hdma_tx;
-	static DMA_HandleTypeDef hdma_rx;
-	
+
+	/* #-1- Enable Peripherals and GPIO Clocks */
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_USART1_CLK_ENABLE();
 
-	/* Enable GPIOA Clock */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	/* #-2- Configure Pheripheral GPIO Pin */
+	/* USART TX GPIO Pin (A.9) is TX Pin */
+	GPIO_InitStructure.Pin			= GPIO_PIN_9;
+	GPIO_InitStructure.Mode			= GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Pull			= GPIO_PULLUP;
+	GPIO_InitStructure.Speed		= GPIO_SPEED_HIGH;
 
-	/* ##-2- Configure Peripheral GPIO */
-	/* Configure USART1 Rx (PA10) as input floating */
-	GPIO_InitStructure.Pin = GPIO_PIN_10;
-	GPIO_InitStructure.Mode = GPIO_MODE_AF_INPUT;
-	GPIO_InitStructure.Pull = GPIO_NOPULL;
-	GPIO_InitStructure.Speed     = GPIO_SPEED_HIGH;
-	HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
-	
-	/* Configure USART1 Tx (PA9) as alternate function push-pull */
-	GPIO_InitStructure.Pin 		= GPIO_PIN_9;
-	GPIO_InitStructure.Mode		= GPIO_MODE_AF_PP;
-	GPIO_InitStructure.Pull	 	= GPIO_PULLUP;
-	GPIO_InitStructure.Speed    = GPIO_SPEED_HIGH;
-	HAL_GPIO_Init( GPIOA, &GPIO_InitStructure );
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* ##-4- Configure the NVIC for USART */	
+	/* USART RX GPIO Pin (A.10) Configure */
+	GPIO_InitStructure.Pin			= GPIO_PIN_10;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* #-3- Configure the NVIC for UART */
 	HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-	
-}
+}
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 {
-  /*##-1- Reset peripherals ##################################################*/
-  __HAL_RCC_USART1_FORCE_RESET();
-  __HAL_RCC_USART1_RELEASE_RESET();
+	/* #-1- Reset Peripheral */
+	__HAL_RCC_USART1_FORCE_RESET();
+	__HAL_RCC_USART1_RELEASE_RESET();
 
-  /*##-2- Disable peripherals and GPIO Clocks #################################*/
-  /* Configure UART Tx as alternate function  */
-  HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9|GPIO_PIN_10);
-  
-  /*##-3- Disable the NVIC for UART ##########################################*/
-  HAL_NVIC_DisableIRQ(USART1_IRQn);
+	/* #-2- Disable Peripherals and GPIO Clocks */
+	HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9 | GPIO_PIN_10);
+
+	/* #-3- Disable the NVIC for UART */
+	HAL_NVIC_DisableIRQ(USART1_IRQn);
 }
 
+void UART_Init(uint32_t baudrate)
+{
+	UartHandle.Instance			= USART1;
+	UartHandle.Init.BaudRate	= baudrate;
+	UartHandle.Init.WordLength	= UART_WORDLENGTH_8B;
+	UartHandle.Init.StopBits	= UART_STOPBITS_1;
+	UartHandle.Init.Parity		= UART_PARITY_NONE;
+	UartHandle.Init.HwFlowCtl	= UART_HWCONTROL_NONE;
+	UartHandle.Init.Mode		= UART_MODE_TX_RX;
+	HAL_UART_DeInit(&UartHandle);
+	HAL_UART_Init(&UartHandle);
+}
+
+void UART_PutString(uint8_t *pBuf, uint8_t DataLen)
+{
+	HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen);
+
+}
+
+void UART_GetString(uint8_t *pBuf, uint8_t DataLen)
+{
+	HAL_UART_Receive_IT(&UartHandle, pBuf, DataLen);
+}

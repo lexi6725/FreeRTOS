@@ -136,5 +136,9 @@ signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar
 portBASE_TYPE xSerialWaitForSemaphore( xComPortHandle xPort );
 void vSerialClose( xComPortHandle xPort );
 
+void UART_Init(uint32_t baudrate);
+void UART_PutString(uint8_t *pBuf, uint8_t DataLen);
+
+
 #endif
 

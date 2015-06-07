@@ -27,6 +27,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_it.h"
+#include "stm32f1xx_hal.h"
 //#include "cmsis_os.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -126,6 +127,11 @@ void SysTick_Handler(void)
 /*  available peripheral interrupt handler's name please refer to the startup */
 /*  file (startup_stm32f1xx.s).                                               */
 /******************************************************************************/
+extern UART_HandleTypeDef UartHandle;
+void USART1_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&UartHandle);
+}
 
 /**
   * @brief  This function handles PPP interrupt request.
