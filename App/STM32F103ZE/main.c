@@ -118,6 +118,8 @@
 #include "flash.h"
 #include "serial.h"
 #include "hmc5883l.h"
+#include "pwm.h"
+#include "serial.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
@@ -129,6 +131,7 @@ void SystemClock_Config(void);
 
 int main( void )
 {
+	PWM_Rate_Type rate;
 #ifdef DEBUG
   debug();
 #endif
@@ -137,12 +140,16 @@ int main( void )
 	BSP_LED_Init(LED1);
 	BSP_LED_Init(LED2);
 	//xSerialPortInitMinimal(115200, 20);
+	PWM_GPIO_Init();
+	rate.left_rate	= 20;
+	rate.right_rate = 80;
+	PWM_TIM_Config(100000, rate);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
 
 	/* Start the scheduler. */
-	vTaskStartScheduler();
+	                       vTaskStartScheduler();
 
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
@@ -202,11 +209,13 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 	TickType_t xRate, xLastTime;
 	uint8_t isConnect = 0;
 	HMC_Measure Measure_data;
+	uint8_t buf[22];
+	uint16_t x, y, z;
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
 	
-	xRate = 500;
+	xRate = 40;
 	xRate /= portTICK_PERIOD_MS;
 	
 	/* We need to initialise xLastFlashTime prior to the first call to 
@@ -216,6 +225,7 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 	if (HMC5883L_IsReady(0x3C, 10))
 	{
 		HMC5883L_Init(0x3C);
+		UART_Init(115200);
 		isConnect = 1;
 	}
 
@@ -228,6 +238,41 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 			HMC5883L_ReadAngle(0x3C, &Measure_data);
 			Measure_data.angle = atan2((double)Measure_data.y, (double)Measure_data.x) * (180/3.1415926) + 180;
 			Measure_data.angle *= 10;
+			x = abs(Measure_data.x);
+			y = abs(Measure_data.y);
+			z = abs(Measure_data.z);
+			buf[0] = 'x';
+			buf[1] = '=';
+			if (Measure_data.x > 0)
+				buf[2] = '+';
+			else
+				buf[2] = '-';
+			buf[3] = (x%1000)/100+'0';
+			buf[4] = (x%100)/10+'0';
+			buf[5] = x%10+'0';
+			buf[6] = '\n';
+			buf[7] = 'y';
+			buf[8] = '=';
+			if (Measure_data.y > 0)
+				buf[9] = '+';
+			else
+				buf[9] = '-';
+			buf[10] = (y%1000)/100+'0';
+			buf[11] = (y%100)/10+'0';
+			buf[12] = y%10+'0';
+			buf[13] = '\n';
+			buf[14] = 'z';
+			buf[15] = '=';
+			if (Measure_data.z > 0)
+				buf[16] = '+';
+			else
+				buf[16] = '-';
+			buf[17] = (z%1000)/100+'0';
+			buf[18] = (z%100)/10+'0';
+			buf[19] = z%10+'0';
+			buf[20] = '\n';
+			buf[21] = '\n';
+			UART_PutString(buf, 22);
 		}
 	}
 }

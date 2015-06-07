@@ -1838,6 +1838,12 @@
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\main.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\pwm.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\serial.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\startup_stm32f103xe.s</name>
     </file>
     <file>
