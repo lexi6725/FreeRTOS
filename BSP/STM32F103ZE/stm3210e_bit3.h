@@ -422,40 +422,40 @@ typedef enum
   * @{
   */
 
-/*##################### FLASH SPI ###################################*/
+/*##################### nRF SPI ###################################*/
 /**
-  * @brief  M25P FLASH SPI Chip Select macro definition 
+  * @brief  M25P nRF SPI Chip Select macro definition 
   */
-#define FLASH_SPI_CS_LOW()       HAL_GPIO_WritePin(FLASH_SPI_CS_GPIO_PORT, FLASH_SPI_CS_PIN, GPIO_PIN_RESET)
-#define FLASH_SPI_CS_HIGH()      HAL_GPIO_WritePin(FLASH_SPI_CS_GPIO_PORT, FLASH_SPI_CS_PIN, GPIO_PIN_SET)
+#define nRF_SPI_CS_LOW()       HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_RESET)
+#define nRF_SPI_CS_HIGH()      HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_SET)
 
 /**
-  * @brief  M25P FLASH SPI Control Interface pins
+  * @brief  M25P nRF SPI Control Interface pins
   */
-#define FLASH_SPI_CS_PIN                           GPIO_PIN_2        /* PB.02*/
-#define FLASH_SPI_CS_GPIO_PORT                     GPIOB
-#define FLASH_SPI_CS_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()
-#define FLASH_SPI_CS_GPIO_CLK_DISABLE()            __HAL_RCC_GPIOB_CLK_DISABLE()
+#define nRF_SPI_CS_PIN                           GPIO_PIN_2        /* PB.02*/
+#define nRF_SPI_CS_GPIO_PORT                     GPIOA
+#define nRF_SPI_CS_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()
+#define nRF_SPI_CS_GPIO_CLK_DISABLE()            __HAL_RCC_GPIOB_CLK_DISABLE()
 
 /**
-  * @brief  M25P FLASH SPI supported commands
+  * @brief  M25P nRF SPI supported commands
   */  
-#define FLASH_SPI_CMD_WRITE          0x02  /*!< Write to Memory instruction */
-#define FLASH_SPI_CMD_WRSR           0x01  /*!< Write Status Register instruction */
-#define FLASH_SPI_CMD_WREN           0x06  /*!< Write enable instruction */
-#define FLASH_SPI_CMD_READ           0x03  /*!< Read from Memory instruction */
-#define FLASH_SPI_CMD_RDSR           0x05  /*!< Read Status Register instruction  */
-#define FLASH_SPI_CMD_RDID           0x9F  /*!< Read identification */
-#define FLASH_SPI_CMD_SE             0xD8  /*!< Sector Erase instruction */
-#define FLASH_SPI_CMD_BE             0xC7  /*!< Bulk Erase instruction */
+#define nRF_SPI_CMD_WRITE          0x02  /*!< Write to Memory instruction */
+#define nRF_SPI_CMD_WRSR           0x01  /*!< Write Status Register instruction */
+#define nRF_SPI_CMD_WREN           0x06  /*!< Write enable instruction */
+#define nRF_SPI_CMD_READ           0x03  /*!< Read from Memory instruction */
+#define nRF_SPI_CMD_RDSR           0x05  /*!< Read Status Register instruction  */
+#define nRF_SPI_CMD_RDID           0x9F  /*!< Read identification */
+#define nRF_SPI_CMD_SE             0xD8  /*!< Sector Erase instruction */
+#define nRF_SPI_CMD_BE             0xC7  /*!< Bulk Erase instruction */
 
-#define FLASH_SPI_WIP_FLAG           0x01  /*!< Write In Progress (WIP) flag */
+#define nRF_SPI_WIP_FLAG           0x01  /*!< Write In Progress (WIP) flag */
 
-#define FLASH_SPI_DUMMY_BYTE         0xA5
-#define FLASH_SPI_PAGESIZE           0x100
+#define nRF_SPI_DUMMY_BYTE         0xA5
+#define nRF_SPI_PAGESIZE           0x100
 
-#define FLASH_SPI_M25P128_ID         0x202018
-#define FLASH_SPI_M25P64_ID          0x202017
+#define nRF_SPI_M25P128_ID         0x202018
+#define nRF_SPI_M25P64_ID          0x202017
 
 
 /*##################### AUDIO ##########################*/

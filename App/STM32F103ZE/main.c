@@ -150,7 +150,7 @@ int main( void )
 	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
 
 	/* Start the scheduler. */
-	                       vTaskStartScheduler();
+	vTaskStartScheduler();
 
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
@@ -210,13 +210,13 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 	TickType_t xRate, xLastTime;
 	uint8_t isConnect = 0;
 	HMC_Measure Measure_data;
-	uint8_t buf[22];
+	uint8_t buf[12];
 	uint16_t x, y, z;
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
 	
-	xRate = 100;
+	xRate = 1000;
 	xRate /= portTICK_PERIOD_MS;
 	
 	/* We need to initialise xLastFlashTime prior to the first call to 
@@ -275,8 +275,17 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 			buf[5] = (z%100)/10+'0';
 			buf[6] = z%10+'0';
 			buf[7] = '\n';
-			buf[8] = '\n';
-			UART_PutString(buf, 9);
+			UART_PutString(buf, 8);
+
+			vTaskDelayUntil( &xLastTime, 2 );
+			Measure_data.angle = (int16_t)(atan2((double)Measure_data.y,(double)Measure_data.x)*(180/3.1415926)+180);
+			memcpy(buf, "angle=", 6);
+			buf[6] = (Measure_data.angle%1000)/100+'0';
+			buf[7] = (Measure_data.angle%100)/10+'0';
+			buf[8] = (Measure_data.angle%10)+'0';
+			buf[9] = '\n';
+			buf[10] = '\n';
+			UART_PutString(buf, 11);
 			BSP_LED_Toggle(LED2);
 		}
 		else
@@ -286,6 +295,7 @@ static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 			{
 				HMC5883L_Init(0x3C);
 				isConnect = 1;
+				UART_PutString("HMC5883L Init ... \n", 19);
 			}
 			UART_PutString("HMC5883L not Connect ...\n", 25);
 		}
