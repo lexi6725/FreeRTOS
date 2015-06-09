@@ -572,7 +572,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -580,7 +580,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>stm32f103ze.srec</state>
+          <state>stm32f103ze.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -588,7 +588,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -698,7 +698,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>E:\Documents\STM32\Project\FreeRTOS\App\STM32F103ZE\stm32f103xe_flash.icf</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F103ZE\stm32f103xe_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
