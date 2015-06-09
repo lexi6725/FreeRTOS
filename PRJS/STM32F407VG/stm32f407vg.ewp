@@ -30,7 +30,7 @@
         <option>
           <name>Variant</name>
           <version>19</version>
-          <state>37</state>
+          <state>38</state>
         </option>
         <option>
           <name>GEndianMode</name>
@@ -61,7 +61,7 @@
         <option>
           <name>FPU</name>
           <version>2</version>
-          <state>0</state>
+          <state>5</state>
         </option>
         <option>
           <name>OGCoreOrChip</name>
@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F10xxE	ST STM32F10xxE</state>
+          <state>STM32F4xxx	ST STM32F4xxx</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -138,12 +138,12 @@
         <option>
           <name>GFPUCoreSlave</name>
           <version>19</version>
-          <state>37</state>
+          <state>38</state>
         </option>
         <option>
           <name>GBECoreSlave</name>
           <version>19</version>
-          <state>37</state>
+          <state>38</state>
         </option>
         <option>
           <name>OGUseCmsis</name>
@@ -293,12 +293,12 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\BSP\STM32F103ZE</state>
-          <state>$PROJ_DIR$\..\..\App\STM32F103ZE\include</state>
-          <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
+          <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
-          <state>$PROJ_DIR$\..\..\Kernel\Portable</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
@@ -544,12 +544,12 @@
         </option>
         <option>
           <name>AUserIncludes</name>
-          <state>$PROJ_DIR$\..\..\BSP\STM32F103ZE</state>
-          <state>$PROJ_DIR$\..\..\App\STM32F103ZE\include</state>
-          <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
+          <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
-          <state>$PROJ_DIR$\..\..\Kernel\Portable</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
@@ -572,7 +572,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -580,7 +580,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>stm32f103ze.srec</state>
+          <state>stm32f407vg.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -588,7 +588,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -610,7 +610,7 @@
       <archiveVersion>1</archiveVersion>
       <data>
         <prebuild></prebuild>
-        <postbuild></postbuild>
+        <postbuild>$PROJ_DIR$\CopyHex_Flash.bat</postbuild>
       </data>
     </settings>
     <settings>
@@ -622,7 +622,7 @@
         <debug>1</debug>
         <option>
           <name>IlinkOutputFile</name>
-          <state>c.out</state>
+          <state>stm32f407vg.out</state>
         </option>
         <option>
           <name>IlinkLibIOConfig</name>
@@ -698,7 +698,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>E:\Documents\STM32\Project\FreeRTOS\App\STM32F103ZE\stm32f103xe_flash.icf</state>
+          <state>E:\Documents\STM32\Project\FreeRTOS\App\STM32F407VG\stm32f407xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -948,7 +948,7 @@
         <option>
           <name>Variant</name>
           <version>19</version>
-          <state>0</state>
+          <state>38</state>
         </option>
         <option>
           <name>GEndianMode</name>
@@ -979,11 +979,11 @@
         <option>
           <name>FPU</name>
           <version>2</version>
-          <state>0</state>
+          <state>5</state>
         </option>
         <option>
           <name>OGCoreOrChip</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GRuntimeLibSelect</name>
@@ -1017,7 +1017,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>default	None</state>
+          <state>STM32F4xxx	ST STM32F4xxx</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -1025,7 +1025,7 @@
         </option>
         <option>
           <name>GEndianModeBE</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OGBufferedTerminalOutput</name>
@@ -1056,12 +1056,12 @@
         <option>
           <name>GFPUCoreSlave</name>
           <version>19</version>
-          <state>0</state>
+          <state>38</state>
         </option>
         <option>
           <name>GBECoreSlave</name>
           <version>19</version>
-          <state>0</state>
+          <state>38</state>
         </option>
         <option>
           <name>OGUseCmsis</name>
@@ -1211,7 +1211,13 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
+          <state>$PROJ_DIR$\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\Kernel\include</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
+          <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1223,7 +1229,7 @@
         </option>
         <option>
           <name>IInterwork2</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IProcessorMode2</name>
@@ -1456,7 +1462,13 @@
         </option>
         <option>
           <name>AUserIncludes</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
+          <state>$PROJ_DIR$\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\Kernel\include</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
+          <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
           <name>AExtraOptionsCheckV2</name>
@@ -1478,15 +1490,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>c.srec</state>
+          <state>output.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -1494,7 +1506,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -1528,7 +1540,7 @@
         <debug>0</debug>
         <option>
           <name>IlinkOutputFile</name>
-          <state>c.out</state>
+          <state>stm32f407vg.hex</state>
         </option>
         <option>
           <name>IlinkLibIOConfig</name>
@@ -1600,11 +1612,11 @@
         </option>
         <option>
           <name>IlinkIcfOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\generic.icf</state>
+          <state>E:\Documents\STM32\Project\FreeRTOS\App\STM32F407VG\stm32f407xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1664,7 +1676,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state></state>
+          <state>__iar_program_start</state>
         </option>
         <option>
           <name>DoFill</name>
@@ -1829,76 +1841,67 @@
   <group>
     <name>App</name>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\flash.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\flash.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\hmc5883l.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\main.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\main.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\pwm.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\pwm.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\serial.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\serial.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\startup_stm32f407xx.s</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\startup_stm32f103xe.s</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\stm32f4xx_it.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\stm32f1xx_it.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\system_stm32f1xx.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\system_stm32f4xx.c</name>
     </file>
   </group>
   <group>
     <name>BSP</name>
     <file>
-      <name>$PROJ_DIR$\..\..\BSP\STM32F103ZE\stm3210e_bit3.c</name>
+      <name>$PROJ_DIR$\..\..\BSP\STM32F407VG\stm324xg_eval.c</name>
     </file>
   </group>
   <group>
     <name>Drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_cortex.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_dma.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio_ex.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_i2c.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc_ex.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim_ex.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_uart.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c</name>
     </file>
   </group>
   <group>
     <name>Kernel</name>
     <group>
-      <name>MemMang</name>
+      <name>MenMang</name>
       <file>
         <name>$PROJ_DIR$\..\..\Kernel\MemMang\heap_2.c</name>
       </file>
@@ -1906,10 +1909,10 @@
     <group>
       <name>Portable</name>
       <file>
-        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3\port.c</name>
+        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F\port.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3\portasm.s</name>
+        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F\portasm.s</name>
       </file>
     </group>
     <file>
@@ -1933,21 +1936,6 @@
   </group>
   <group>
     <name>Libs</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcBase.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcHardwarePort.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernel.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernelPort.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcUser.c</name>
-    </file>
   </group>
 </project>
 

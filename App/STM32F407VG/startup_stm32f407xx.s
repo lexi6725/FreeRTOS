@@ -1,4 +1,4 @@
-;/******************** (C) COPYRIGHT 2015 STMicroelectronics ********************
+;******************** (C) COPYRIGHT 2015 STMicroelectronics *********************
 ;* File Name          : startup_stm32f407xx.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.3.0
@@ -64,6 +64,8 @@
 
         EXTERN  __iar_program_start
         EXTERN  SystemInit
+        EXTERN	xPortPendSVHandler
+        EXTERN	vPortSVCHandler
         PUBLIC  __vector_table
 
         DATA
@@ -80,10 +82,10 @@ __vector_table
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
-        DCD     SVC_Handler               ; SVCall Handler
+        DCD     vPortSVCHandler           ; SVCall Handler
         DCD     DebugMon_Handler          ; Debug Monitor Handler
         DCD     0                         ; Reserved
-        DCD     PendSV_Handler            ; PendSV Handler
+        DCD     xPortPendSVHandler        ; PendSV Handler
         DCD     SysTick_Handler           ; SysTick Handler
 
          ; External Interrupts

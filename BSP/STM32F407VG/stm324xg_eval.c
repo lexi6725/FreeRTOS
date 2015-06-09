@@ -46,7 +46,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm324xg_eval.h"
-#include "stm324xg_eval_io.h"
+//#include "stm324xg_eval_io.h"
 
 /** @addtogroup BSP
   * @{
@@ -155,6 +155,7 @@ static uint8_t Is_LCD_IO_Initialized = 0;
 /** @defgroup STM324xG_EVAL_LOW_LEVEL_Private_FunctionPrototypes
   * @{
   */ 
+#if 0
 static void     I2Cx_Init(void);
 static void     I2Cx_ITConfig(void);
 static void     I2Cx_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -201,6 +202,7 @@ void                EEPROM_IO_Init(void);
 HAL_StatusTypeDef   EEPROM_IO_WriteData(uint16_t DevAddress, uint16_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize);
 HAL_StatusTypeDef   EEPROM_IO_ReadData(uint16_t DevAddress, uint16_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize);
 HAL_StatusTypeDef   EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
+#endif
 /**
   * @}
   */ 
@@ -309,6 +311,7 @@ void BSP_LED_Toggle(Led_TypeDef Led)
   *                                    with interrupt generation capability  
   * @retval None
   */
+#if 0
 void BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -1095,5 +1098,5 @@ HAL_StatusTypeDef EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 /**
   * @}
   */ 
-    
+#endif    
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
