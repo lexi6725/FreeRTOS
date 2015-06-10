@@ -4,6 +4,9 @@
   <project>
     <path>$WS_DIR$\stm32f103ze.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\..\STM32F407VG\stm32f407vg.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 

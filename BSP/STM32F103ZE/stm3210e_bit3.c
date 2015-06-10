@@ -915,7 +915,7 @@ HAL_StatusTypeDef SPIx_Init(void)
 
   /* SPI Config */
   /* SPI baudrate is set to 36 MHz (PCLK2/SPI_BaudRatePrescaler = 72/2 = 36 MHz) */
-  heval_Spi.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_2;
+  heval_Spi.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_32;
   heval_Spi.Init.Direction          = SPI_DIRECTION_2LINES;
   heval_Spi.Init.CLKPhase           = SPI_PHASE_1EDGE;
   heval_Spi.Init.CLKPolarity        = SPI_POLARITY_LOW;

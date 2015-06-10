@@ -1906,10 +1906,10 @@
     <group>
       <name>Portable</name>
       <file>
-        <name>$PROJ_DIR$\..\..\Kernel\Portable\port.c</name>
+        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3\port.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\Kernel\Portable\portasm.s</name>
+        <name>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3\portasm.s</name>
       </file>
     </group>
     <file>
