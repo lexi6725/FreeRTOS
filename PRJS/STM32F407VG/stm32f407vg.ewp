@@ -610,7 +610,7 @@
       <archiveVersion>1</archiveVersion>
       <data>
         <prebuild></prebuild>
-        <postbuild>$PROJ_DIR$\CopyHex_Flash.bat</postbuild>
+        <postbuild></postbuild>
       </data>
     </settings>
     <settings>
@@ -698,7 +698,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>E:\Documents\STM32\Project\FreeRTOS\App\STM32F407VG\stm32f407xx_flash.icf</state>
+          <state>$PROJ_DIR$\..\..\App\STM32F407VG\stm32f407xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>

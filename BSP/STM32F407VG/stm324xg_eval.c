@@ -245,6 +245,10 @@ void BSP_LED_Init(Led_TypeDef Led)
   GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
   
   HAL_GPIO_Init(GPIO_PORT[Led], &GPIO_InitStruct);
+  BSP_LED_Off(LED1);
+  BSP_LED_Off(LED2);
+  BSP_LED_Off(LED3);
+  BSP_LED_Off(LED4);
 }
 
 /**
@@ -259,7 +263,7 @@ void BSP_LED_Init(Led_TypeDef Led)
   */
 void BSP_LED_On(Led_TypeDef Led)
 {
-  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_SET); 
+  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET); 
 }
 
 /**
@@ -274,7 +278,7 @@ void BSP_LED_On(Led_TypeDef Led)
   */
 void BSP_LED_Off(Led_TypeDef Led)
 {
-  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET); 
+  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_SET); 
 }
 
 /**
