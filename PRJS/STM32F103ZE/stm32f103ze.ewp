@@ -298,7 +298,7 @@
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
-          <state>$PROJ_DIR$\..\..\Kernel\Portable</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
@@ -549,7 +549,7 @@
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
-          <state>$PROJ_DIR$\..\..\Kernel\Portable</state>
+          <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
         </option>
         <option>
@@ -1838,6 +1838,9 @@
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\main.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\nrf24l01.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\pwm.c</name>
     </file>
     <file>
@@ -1884,6 +1887,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc_ex.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim.c</name>

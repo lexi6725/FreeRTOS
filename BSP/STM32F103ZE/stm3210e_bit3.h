@@ -426,37 +426,29 @@ typedef enum
 /**
   * @brief  M25P nRF SPI Chip Select macro definition 
   */
-#define nRF_SPI_CS_LOW()       HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_RESET)
-#define nRF_SPI_CS_HIGH()      HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_SET)
+#define nRF_SPI_CS_LOW()		HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_RESET)
+#define nRF_SPI_CS_HIGH()		HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_SET)
+#define nRF_CSN_LOW()			HAL_GPIO_WritePin(nRF_CSN_GPIO_PORT, nRF_CSN_PIN, GPIO_PIN_RESET)
+#define nRF_CSN_HIGH()			HAL_GPIO_WritePin(nRF_CSN_GPIO_PORT, nRF_CSN_PIN, GPIO_PIN_SET)
 
+#define nRF_IRQ_STATE()			HAL_GPIO_ReadPin(nRF_IRQ_GPIO_PORT, nRF_IRQ_PIN)
 /**
   * @brief  M25P nRF SPI Control Interface pins
   */
-#define nRF_SPI_CS_PIN                           GPIO_PIN_2        /* PB.02*/
-#define nRF_SPI_CS_GPIO_PORT                     GPIOA
-#define nRF_SPI_CS_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()
-#define nRF_SPI_CS_GPIO_CLK_DISABLE()            __HAL_RCC_GPIOB_CLK_DISABLE()
+#define nRF_SPI_CS_PIN							GPIO_PIN_4        /* PA.04*/
+#define nRF_SPI_CS_GPIO_PORT					GPIOA
+#define nRF_SPI_CS_GPIO_CLK_ENABLE()			__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_SPI_CS_GPIO_CLK_DISABLE()			__HAL_RCC_GPIOA_CLK_DISABLE()
 
-/**
-  * @brief  M25P nRF SPI supported commands
-  */  
-#define nRF_SPI_CMD_WRITE          0x02  /*!< Write to Memory instruction */
-#define nRF_SPI_CMD_WRSR           0x01  /*!< Write Status Register instruction */
-#define nRF_SPI_CMD_WREN           0x06  /*!< Write enable instruction */
-#define nRF_SPI_CMD_READ           0x03  /*!< Read from Memory instruction */
-#define nRF_SPI_CMD_RDSR           0x05  /*!< Read Status Register instruction  */
-#define nRF_SPI_CMD_RDID           0x9F  /*!< Read identification */
-#define nRF_SPI_CMD_SE             0xD8  /*!< Sector Erase instruction */
-#define nRF_SPI_CMD_BE             0xC7  /*!< Bulk Erase instruction */
+#define nRF_CSN_PIN								GPIO_PIN_3        /* PA.08*/
+#define nRF_CSN_GPIO_PORT						GPIOA
+#define nRF_CSN_GPIO_CLK_ENABLE()				__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_CSN_GPIO_CLK_DISABLE()				__HAL_RCC_GPIOA_CLK_DISABLE()
 
-#define nRF_SPI_WIP_FLAG           0x01  /*!< Write In Progress (WIP) flag */
-
-#define nRF_SPI_DUMMY_BYTE         0xA5
-#define nRF_SPI_PAGESIZE           0x100
-
-#define nRF_SPI_M25P128_ID         0x202018
-#define nRF_SPI_M25P64_ID          0x202017
-
+#define nRF_IRQ_PIN								GPIO_PIN_2
+#define nRF_IRQ_GPIO_PORT						GPIOA
+#define nRF_IRQ_CLK_ENABLE()					__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_IRQ_CLK_DISABLE()					__HAL_RCC_GPIOA_CLK_DISABLE()
 
 /*##################### AUDIO ##########################*/
 /**
@@ -505,6 +497,14 @@ void HMC5883L_IO_Init(void);
 /**
   * @}
   */
+HAL_StatusTypeDef nRF_SPI_IO_Init(void);
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data);
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg);
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize);
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize);
+
+
+
 
 
 /**

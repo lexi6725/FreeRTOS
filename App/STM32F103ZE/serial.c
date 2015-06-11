@@ -157,7 +157,6 @@ void UART_Init(uint32_t baudrate)
 void UART_PutString(uint8_t *pBuf, uint8_t DataLen)
 {
 	HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen);
-
 }
 
 void UART_GetString(uint8_t *pBuf, uint8_t DataLen)

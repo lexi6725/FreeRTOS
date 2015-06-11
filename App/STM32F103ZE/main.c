@@ -120,9 +120,11 @@
 #include "hmc5883l.h"
 #include "pwm.h"
 #include "serial.h"
+#include "nrf24l01.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
+#define mainRF_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
 
 static portTASK_FUNCTION_PROTO( vHMC5883LTask, pvParameters );
 
@@ -148,7 +150,8 @@ int main( void )
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
-
+	vStartnRFTasks(mainRF_TASK_PRIORITY);
+	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 

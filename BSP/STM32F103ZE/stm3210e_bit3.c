@@ -230,19 +230,16 @@ uint8_t                   AUDIO_IO_Read(uint8_t Addr, uint8_t Reg);
 #ifdef HAL_SPI_MODULE_ENABLED
 /* SPIx bus function */
 static HAL_StatusTypeDef  SPIx_Init(void);
-static uint8_t            SPIx_Write(uint8_t Value);
-static uint8_t            SPIx_Read(void);
+static uint8_t            SPIx_ReadWriteByte(uint8_t Value);
 static void               SPIx_Error (void);
 static void               SPIx_MspInit(SPI_HandleTypeDef *hspi);
 
-/* Link function for EEPROM peripheral over SPI */
-HAL_StatusTypeDef         nRF_SPI_IO_Init(void);
-uint8_t                   nRF_SPI_IO_WriteByte(uint8_t Data);
-uint8_t                   nRF_SPI_IO_ReadByte(void);
-HAL_StatusTypeDef         nRF_SPI_IO_ReadData(uint32_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize);
-void                      nRF_SPI_IO_WriteEnable(void);
-HAL_StatusTypeDef         nRF_SPI_IO_WaitForWriteEnd(void);
-uint32_t                  nRF_SPI_IO_ReadID(void);
+/* Link function for nRF24L01 peripheral over SPI */
+HAL_StatusTypeDef nRF_SPI_IO_Init(void);
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data);
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg);
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize);
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize);
 #endif /* HAL_SPI_MODULE_ENABLED */
 
 /** @defgroup STM3210E_EVAL_Exported_Functions Exported Functions
@@ -915,7 +912,7 @@ HAL_StatusTypeDef SPIx_Init(void)
 
   /* SPI Config */
   /* SPI baudrate is set to 36 MHz (PCLK2/SPI_BaudRatePrescaler = 72/2 = 36 MHz) */
-  heval_Spi.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_32;
+  heval_Spi.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_8;
   heval_Spi.Init.Direction          = SPI_DIRECTION_2LINES;
   heval_Spi.Init.CLKPhase           = SPI_PHASE_1EDGE;
   heval_Spi.Init.CLKPolarity        = SPI_POLARITY_LOW;
@@ -938,7 +935,7 @@ HAL_StatusTypeDef SPIx_Init(void)
   * @param  WriteValue to be written
   * @retval The value of the received byte.
   */
-static uint8_t SPIx_Write(uint8_t WriteValue)
+static uint8_t SPIx_ReadWriteByte(uint8_t WriteValue)
 {
   HAL_StatusTypeDef status = HAL_OK;
   uint8_t ReadValue = 0;
@@ -954,17 +951,6 @@ static uint8_t SPIx_Write(uint8_t WriteValue)
   
    return ReadValue;
 }
-
-
-/**
-  * @brief SPI Read 1 byte from device
-  * @retval Read data
-*/
-static uint8_t SPIx_Read(void)
-{
-  return (SPIx_Write(nRF_SPI_DUMMY_BYTE));
-}
-
 
 /**
   * @brief SPI error treatment function
@@ -1087,10 +1073,16 @@ HAL_StatusTypeDef nRF_SPI_IO_Init(void)
   nRF_SPI_CS_GPIO_CLK_ENABLE();
 
   /* Configure EEPROM_CS_PIN pin: EEPROM SPI CS pin */
-  gpioinitstruct.Pin    = nRF_SPI_CS_PIN;
+  gpioinitstruct.Pin    = nRF_SPI_CS_PIN|nRF_CSN_PIN;
   gpioinitstruct.Mode   = GPIO_MODE_OUTPUT_PP;
   gpioinitstruct.Pull   = GPIO_PULLUP;
   gpioinitstruct.Speed  = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+
+  gpioinitstruct.Pin	= nRF_IRQ_PIN;
+  gpioinitstruct.Mode	= GPIO_MODE_INPUT;
+  gpioinitstruct.Pull	= GPIO_NOPULL;
+  gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
   HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
 
   /* SPI nRF Config */
@@ -1098,6 +1090,7 @@ HAL_StatusTypeDef nRF_SPI_IO_Init(void)
   
   /* EEPROM chip select high */
   nRF_SPI_CS_HIGH();
+  nRF_CSN_LOW();
   
   return Status;
 }
@@ -1107,25 +1100,46 @@ HAL_StatusTypeDef nRF_SPI_IO_Init(void)
   * @param  Data: byte to send.
   * @retval None
   */
-uint8_t nRF_SPI_IO_WriteByte(uint8_t Data)
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data)
 {
-  /* Send the byte */
-  return (SPIx_Write(Data));
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send the Write Reg */
+	status = SPIx_ReadWriteByte(Reg);
+
+	/* Send the Write Data */
+	SPIx_ReadWriteByte(Data);
+	
+	/*!< Deselect the nRF: Chip Select High */
+	nRF_SPI_CS_HIGH();
+	
+	return (status);
 }
 
 /**
   * @brief  Read a byte from the nRF SPI.
   * @retval uint8_t (The received byte).
   */
-uint8_t nRF_SPI_IO_ReadByte(void)
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg)
 {
-  uint8_t data = 0;
-  
-  /* Get the received data */
-  data = SPIx_Read();
+	uint8_t data = 0;
+	
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
 
-  /* Return the shifted data */
-  return data;
+	/* Send Read Reg */
+	SPIx_ReadWriteByte(Reg);
+	
+	/* Get the received data */
+	data = SPIx_ReadWriteByte(0xFF);
+
+	/*!< Deselect the nRF: Chip Select High */
+	nRF_SPI_CS_HIGH();
+
+	/* Return the shifted data */
+	return data;
 }
 
 /**
@@ -1135,117 +1149,59 @@ uint8_t nRF_SPI_IO_ReadByte(void)
   * @param  BufferSize: Amount of data to be read
   * @retval HAL_StatusTypeDef HAL Status
   */
-HAL_StatusTypeDef nRF_SPI_IO_ReadData(uint32_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize)
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize)
 {
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_LOW();
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
 
-  /*!< Send "Read from Memory " instruction */
-  SPIx_Write(nRF_SPI_CMD_READ);
+	/* Send Read Reg */
+	status = SPIx_ReadWriteByte(Reg);
+	
+	while (BufferSize--) /*!< while there is data to be read */
+	{
+		/*!< Read a byte from the nRF */
+		*pBuffer = SPIx_ReadWriteByte(0XFF);
+		/*!< Point to the next location where the byte read will be saved */
+		pBuffer++;
+	}
 
-  /*!< Send ReadAddr high nibble address byte to read from */
-  SPIx_Write((MemAddress & 0xFF0000) >> 16);
-  /*!< Send ReadAddr medium nibble address byte to read from */
-  SPIx_Write((MemAddress& 0xFF00) >> 8);
-  /*!< Send ReadAddr low nibble address byte to read from */
-  SPIx_Write(MemAddress & 0xFF);
+	/*!< Deselect the nRF: Chip Select high */
+	nRF_SPI_CS_HIGH();
 
-  while (BufferSize--) /*!< while there is data to be read */
-  {
-    /*!< Read a byte from the nRF */
-    *pBuffer = SPIx_Write(nRF_SPI_DUMMY_BYTE);
-    /*!< Point to the next location where the byte read will be saved */
-    pBuffer++;
-  }
-
-  /*!< Deselect the nRF: Chip Select high */
-  nRF_SPI_CS_HIGH();
-
-  return HAL_OK;
+	return status;
 }
 
 /**
-  * @brief  Select the nRF SPI and send "Write Enable" instruction
-  * @retval None
+  * @brief  Write data To nRF SPI driver
+  * @param  Reg: Internal memory address
+  * @param  pBuffer: Pointer to data buffer
+  * @param  BufferSize: Amount of data to be read
+  * @retval 	nRF Status
   */
-void nRF_SPI_IO_WriteEnable(void)
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize)
 {
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_LOW();
-  
-  /*!< Send "Write Enable" instruction */
-  SPIx_Write(nRF_SPI_CMD_WREN);
-  
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_HIGH();
-  
-    /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_LOW();
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send Write Reg */
+	status = SPIx_ReadWriteByte(Reg);
+	
+	while (BufferSize--) /*!< while there is data to be write */
+	{
+		/*!< Write a byte to the nRF */
+		SPIx_ReadWriteByte(*pBuffer);
+		/*!< Point to the next location where the byte Write will be Send */
+		pBuffer++;
+	}
+
+	/*!< Deselect the nRF: Chip Select high */
+	nRF_SPI_CS_HIGH();
+
+	return status;
 }
 
-/**
-  * @brief  Wait response from the nRF SPI and Deselect the device
-  * @retval HAL_StatusTypeDef HAL Status
-  */
-HAL_StatusTypeDef nRF_SPI_IO_WaitForWriteEnd(void)
-{
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_HIGH();
-  
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_LOW();
-  
-  uint8_t flashstatus = 0;
-
-  /*!< Send "Read Status Register" instruction */
-  SPIx_Write(nRF_SPI_CMD_RDSR);
-
-  /*!< Loop as long as the memory is busy with a write cycle */
-  do
-  {
-    /*!< Send a dummy byte to generate the clock needed by the nRF
-    and put the value of the status register in nRF_Status variable */
-    flashstatus = SPIx_Write(nRF_SPI_DUMMY_BYTE);
-
-  }
-  while ((flashstatus & nRF_SPI_WIP_FLAG) == SET); /* Write in progress */
-
-  /*!< Deselect the nRF: Chip Select high */
-  nRF_SPI_CS_HIGH();
-  
-  return HAL_OK;
-}
-
-/**
-  * @brief  Reads nRF SPI identification.
-  * @retval nRF identification
-  */
-uint32_t nRF_SPI_IO_ReadID(void)
-{
-  uint32_t Temp = 0, Temp0 = 0, Temp1 = 0, Temp2 = 0;
-
-  /*!< Select the nRF: Chip Select low */
-  nRF_SPI_CS_LOW();
-
-  /*!< Send "RDID " instruction */
-  SPIx_Write(0x9F);
-
-  /*!< Read a byte from the nRF */
-  Temp0 = SPIx_Write(nRF_SPI_DUMMY_BYTE);
-
-  /*!< Read a byte from the nRF */
-  Temp1 = SPIx_Write(nRF_SPI_DUMMY_BYTE);
-
-  /*!< Read a byte from the nRF */
-  Temp2 = SPIx_Write(nRF_SPI_DUMMY_BYTE);
-
-  /*!< Deselect the nRF: Chip Select high */
-  nRF_SPI_CS_HIGH();
-
-  Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
-
-  return Temp;
-}
 #endif /* HAL_SPI_MODULE_ENABLED */
 
 #ifdef HAL_I2C_MODULE_ENABLED
