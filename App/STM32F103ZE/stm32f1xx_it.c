@@ -134,12 +134,13 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles PPP interrupt request.
+  * @brief  This function handles EXTI2 interrupt request.
   * @param  None
   * @retval None
   */
-/*void PPP_IRQHandler(void)
+void EXTI2_IRQHandler(void)
 {
-}*/
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

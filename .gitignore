@@ -18,6 +18,7 @@
 /PRJS/STM32F407VG/settings
 /PRJS/STM32F407VG/Release
 
+*.ewt
 *.pbi
 *.cout
 *.r43

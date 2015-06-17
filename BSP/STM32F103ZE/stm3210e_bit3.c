@@ -1065,34 +1065,38 @@ void LCD_Delay (uint32_t Delay)
   */
 HAL_StatusTypeDef nRF_SPI_IO_Init(void)
 {
-  HAL_StatusTypeDef Status = HAL_OK;
-  
-  GPIO_InitTypeDef  gpioinitstruct = {0};
+	HAL_StatusTypeDef Status = HAL_OK;
 
-  /* EEPROM_CS_GPIO Periph clock enable */
-  nRF_SPI_CS_GPIO_CLK_ENABLE();
+	GPIO_InitTypeDef  gpioinitstruct = {0};
 
-  /* Configure EEPROM_CS_PIN pin: EEPROM SPI CS pin */
-  gpioinitstruct.Pin    = nRF_SPI_CS_PIN|nRF_CSN_PIN;
-  gpioinitstruct.Mode   = GPIO_MODE_OUTPUT_PP;
-  gpioinitstruct.Pull   = GPIO_PULLUP;
-  gpioinitstruct.Speed  = GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+	/* EEPROM_CS_GPIO Periph clock enable */
+	nRF_SPI_CS_GPIO_CLK_ENABLE();
 
-  gpioinitstruct.Pin	= nRF_IRQ_PIN;
-  gpioinitstruct.Mode	= GPIO_MODE_INPUT;
-  gpioinitstruct.Pull	= GPIO_NOPULL;
-  gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+	/* Configure EEPROM_CS_PIN pin: EEPROM SPI CS pin */
+	gpioinitstruct.Pin    = nRF_SPI_CS_PIN|nRF_CSN_PIN;
+	gpioinitstruct.Mode   = GPIO_MODE_OUTPUT_PP;
+	gpioinitstruct.Pull   = GPIO_PULLUP;
+	gpioinitstruct.Speed  = GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
 
-  /* SPI nRF Config */
-  Status = SPIx_Init();
-  
-  /* EEPROM chip select high */
-  nRF_SPI_CS_HIGH();
-  nRF_CSN_LOW();
-  
-  return Status;
+	gpioinitstruct.Pin	= nRF_IRQ_PIN;
+	gpioinitstruct.Mode	= GPIO_MODE_EVT_FALLING;
+	gpioinitstruct.Pull	= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+
+	/* Enable and set Eval EXTI2(PA2) Interrupt to the highest priority */
+    HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);
+    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+    
+	/* SPI nRF Config */
+	Status = SPIx_Init();
+
+	/* EEPROM chip select high */
+	nRF_SPI_CS_HIGH();
+	nRF_CSN_LOW();
+
+	return Status;
 }
 
 /**

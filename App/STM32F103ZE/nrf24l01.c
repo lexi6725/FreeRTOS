@@ -11,8 +11,10 @@
 
 #include "serial.h"
 
-const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x67};
-const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x67};
+//#define TX_SEND
+
+const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
+const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 
 uint8_t nRF_Check(void)
 {
@@ -33,6 +35,7 @@ void nRF_RX_Mode(void)
 	/*!< Select the nRF: Chip Select low */
 	nRF_SPI_CS_LOW();
 
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_TX_ADDRESS, nRF_TX_ADR_WIDTH);
 	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_RX_ADDRESS, nRF_RX_ADR_WIDTH);
 
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_AA, 0x01);
@@ -53,16 +56,19 @@ void nRF_TX_Mode(void)
 	nRF_CSN_LOW();
 
 	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_TX_ADDRESS, nRF_TX_ADR_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_RX_ADDRESS, nRF_RX_ADR_WIDTH);
 
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_AA, 0x01);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_RXADDR, 0x01);
-	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_SETUP_RETR, 0x1A);
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_SETUP_RETR, 0x0A);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RF_CH, 40);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RF_SETUP, 0x0F);
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RX_PW_P0, nRF_RX_PLOAD_WIDTH);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_CONFIG, 0x0E);
 	
 	/*!< Deselect the nRF: Chip Select high */
 	nRF_CSN_HIGH();
+	
 }
 
 uint8_t nRF_TxPacket(uint8_t *txbuf)
@@ -71,6 +77,8 @@ uint8_t nRF_TxPacket(uint8_t *txbuf)
 
 	/*!< Select the nRF: Chip Select low */
 	nRF_CSN_LOW();
+	
+	nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
 
 	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, txbuf, nRF_TX_PLOAD_WIDTH);
 	
@@ -84,15 +92,18 @@ uint8_t nRF_TxPacket(uint8_t *txbuf)
 
 	if (status & nRF_MAX_TX)
 	{
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
+		nRF_CSN_LOW();
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
+		nRF_CSN_HIGH();
 		return nRF_MAX_TX;
 	}
 	if (status & nRF_TX_OK)
 	{
+		nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, status);
 		return nRF_TX_OK;
 	}
 
-	return 0xFF;
+	return status;
 }
 
 uint8_t nRF_RxPacket(uint8_t *rxbuf)
@@ -104,12 +115,28 @@ uint8_t nRF_RxPacket(uint8_t *rxbuf)
 	if (status & nRF_RX_OK)
 	{
 		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, rxbuf, nRF_RX_PLOAD_WIDTH);
+		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
+		nRF_CSN_HIGH();
 		return 0;
 	}
+	nRF_CSN_LOW();
+	nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
+	nRF_CSN_HIGH();
+	status = nRF_SPI_IO_ReadReg(nRF_FIFO_STATUS);
 
-	return 1;
+	return status;
 }
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	uint8_t RegValue;
+	RegValue = nRF_SPI_IO_ReadReg(nRF_STATUS);
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, RegValue);
+	RegValue = nRF_SPI_IO_ReadReg(nRF_FIFO_STATUS);
+}
+
 
 /* The task that is created three times. */
 static portTASK_FUNCTION_PROTO( vnRFTask, pvParameters );
@@ -125,6 +152,12 @@ void vStartnRFTasks( UBaseType_t uxPriority )
 static portTASK_FUNCTION( vnRFTask, pvParameters )
 {
 TickType_t xRate, xLastTime;
+uint8_t	retValue;
+#if defined(TX_SEND)
+uint8_t buf[33] = "Tx Send ...\n";
+#else
+uint8_t buf[33];
+#endif
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
@@ -142,9 +175,49 @@ TickType_t xRate, xLastTime;
 	for(;;)
 	{
 		vTaskDelayUntil( &xLastTime, xRate );
-		if (nRF_Check() == HAL_OK)
+		//if (nRF_Check() == HAL_OK)
 		{
-			UART_PutString("nRF24L01 Connected ...\n", 23);
+			#if defined(TX_SEND)
+			nRF_TX_Mode();
+			if ((retValue = nRF_TxPacket(buf))== nRF_TX_OK)
+			{
+				BSP_LED_Toggle(LED2);
+				UART_PutString(buf, 12);\
+			}
+			else if (retValue == nRF_MAX_TX)
+			{
+				UART_PutString("Max TX\n", 7);
+			}
+			//vTaskDelayUntil( &xLastTime, 1);
+			//nRF_RX_Mode();
+			//if (nRF_RxPacket(buf) == 0)
+			//{
+			//	BSP_LED_Off(LED2);
+			//	UART_PutString(buf, 12);
+			//}
+			#else
+			nRF_RX_Mode();
+			vTaskDelayUntil(&xLastTime, 1);
+			memset(buf, 0, 33);
+			if ((retValue = nRF_RxPacket(buf)) == 0)
+			{
+				BSP_LED_Toggle(LED2);
+				UART_PutString(buf, 12);
+				//vTaskDelayUntil( &xLastTime, xRate);
+			}
+			else
+			{
+				//vTaskDelayUntil( &xLastTime, xRate);
+				UART_PutString("Rev Err\n", 8);
+			}
+			//vTaskDelayUntil( &xLastTime, 1);
+			//nRF_TX_Mode();
+			//if (nRF_TxPacket(buf)== nRF_TX_OK)
+			//{
+			//	BSP_LED_Off(LED2);
+			//	UART_PutString(buf, 12);
+			//}
+			#endif
 		}
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
