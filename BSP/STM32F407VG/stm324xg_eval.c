@@ -148,6 +148,9 @@ I2C_HandleTypeDef  heval_I2c;
 
 static uint8_t Is_LCD_IO_Initialized = 0;
 
+uint32_t SpixTimeout = X3_SPIx_TIMEOUT_MAX;
+static SPI_HandleTypeDef hx3_Spi;
+
 /**
   * @}
   */ 
@@ -155,7 +158,7 @@ static uint8_t Is_LCD_IO_Initialized = 0;
 /** @defgroup STM324xG_EVAL_LOW_LEVEL_Private_FunctionPrototypes
   * @{
   */ 
-#if 0
+
 static void     I2Cx_Init(void);
 static void     I2Cx_ITConfig(void);
 static void     I2Cx_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -166,6 +169,7 @@ static HAL_StatusTypeDef  I2Cx_IsDeviceReady(uint16_t DevAddress, uint32_t Trial
 static void     I2Cx_Error(uint8_t Addr);
 static void     I2Cx_MspInit(void);
 
+#if 0
 static void     FSMC_BANK3_WriteData(uint16_t Data);
 static void     FSMC_BANK3_WriteReg(uint8_t Reg);
 static uint16_t FSMC_BANK3_ReadData(void);
@@ -196,13 +200,27 @@ void            CAMERA_IO_Init(void);
 void            CAMERA_IO_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
 uint8_t         CAMERA_IO_Read(uint8_t Addr, uint8_t Reg);
 void            CAMERA_Delay(uint32_t Delay);
+#endif
 
 /* I2C EEPROM IO function */
 void                EEPROM_IO_Init(void);
 HAL_StatusTypeDef   EEPROM_IO_WriteData(uint16_t DevAddress, uint16_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize);
 HAL_StatusTypeDef   EEPROM_IO_ReadData(uint16_t DevAddress, uint16_t MemAddress, uint8_t* pBuffer, uint32_t BufferSize);
 HAL_StatusTypeDef   EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
-#endif
+
+/* SPIx bus function */
+static HAL_StatusTypeDef  SPIx_Init(void);
+static uint8_t            SPIx_ReadWriteByte(uint8_t Value);
+static void               SPIx_Error (void);
+static void               SPIx_MspInit(SPI_HandleTypeDef *hspi);
+
+/* Link function for nRF24L01 peripheral over SPI */
+HAL_StatusTypeDef nRF_SPI_IO_Init(void);
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data);
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg);
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize);
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize);
+
 /**
   * @}
   */ 
@@ -492,7 +510,7 @@ JOYState_TypeDef BSP_JOY_GetState(void)
     return(JOYState_TypeDef) JOY_NONE;
   }  
 }
-
+#endif
 /*******************************************************************************
                             BUS OPERATIONS
 *******************************************************************************/
@@ -714,6 +732,104 @@ static void I2Cx_Error(uint8_t Addr)
   I2Cx_Init();  
 }
 
+/**
+  * @brief Initializes SPI MSP.
+  * @retval None
+  */
+static void SPIx_MspInit(SPI_HandleTypeDef *hspi)
+{
+	GPIO_InitTypeDef	gpioinitstruct = {0};
+
+	/*** Configure the GPIOs ***/
+	/* Enable GPIO clock */
+	X3_SPIx_SCK_GPIO_CLK_ENABLE();
+	X3_SPIx_MISO_MOSI_GPIO_CLK_ENABLE();
+
+	/* Configure SPI SCK */
+	gpioinitstruct.Pin		= X3_SPIx_SCK_PIN;
+	gpioinitstruct.Mode		= GPIO_MODE_AF_PP;
+	gpioinitstruct.Pull		= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(X3_SPIx_SCK_GPIO_PORT, &gpioinitstruct);
+
+	/* Configure SPI MISO and MOSI */
+	gpioinitstruct.Pin		= (X3_SPIx_MISO_PIN|X3_SPIx_MOSI_PIN);
+	gpioinitstruct.Mode		= GPIO_MODE_AF_PP;
+	gpioinitstruct.Pull		= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(X3_SPIx_MISO_MOSI_GPIO_PORT, &gpioinitstruct);
+
+	/*** Configure the SPI peripheral ***/
+	/* Enable SPI Clock */
+	X3_SPIx_CLK_ENABLE();
+}
+
+/**
+  * @brief Initializes SPI HAL.
+  * @retval None
+  */
+HAL_StatusTypeDef SPIx_Init(void)
+{
+	/* DeInitializes the SPI peripheral */
+	hx3_Spi.Instance = X3_SPIx;
+	HAL_SPI_DeInit(&hx3_Spi);
+
+	/* SPI Config */
+	/* SPI baudrate is set to 9MHz (PCLK2/SPI_BaudRatePrescaler = 72/8 = 9MHz) */
+	hx3_Spi.Init.BaudRatePrescaler	= SPI_BAUDRATEPRESCALER_8;
+	hx3_Spi.Init.Direction			= SPI_DIRECTION_2LINES;
+	hx3_Spi.Init.CLKPhase			= SPI_PHASE_1EDGE;
+	hx3_Spi.Init.CLKPolarity		= SPI_POLARITY_LOW;
+	hx3_Spi.Init.CRCCalculation		= SPI_CRCCALCULATION_DISABLE;
+	hx3_Spi.Init.CRCPolynomial		= 7;
+	hx3_Spi.Init.DataSize			= SPI_DATASIZE_8BIT;
+	hx3_Spi.Init.FirstBit			= SPI_FIRSTBIT_MSB;
+	hx3_Spi.Init.NSS				= SPI_NSS_SOFT;
+	hx3_Spi.Init.TIMode				= SPI_TIMODE_DISABLE;
+	hx3_Spi.Init.Mode				= SPI_MODE_MASTER;
+
+	SPIx_MspInit(&hx3_Spi);
+
+	return (HAL_SPI_Init(&hx3_Spi));
+}
+
+/**
+  * @brief  SPI Write a byte to device
+  * @param  WriteValue to be written
+  * @retval The value of the received byte.
+  */
+static uint8_t SPIx_ReadWriteByte(uint8_t WriteValue)
+{
+	HAL_StatusTypeDef status = HAL_OK;
+	uint8_t ReadValue = 0;
+
+	status = HAL_SPI_TransmitReceive(&hx3_Spi, (uint8_t*) &WriteValue, (uint8_t*) &ReadValue, 1, SpixTimeout);
+
+	/* Check the communication status */
+	if(status != HAL_OK)
+	{
+		/* Execute user timeout callback */
+		SPIx_Error();
+	}
+
+	return ReadValue;
+}
+
+/**
+  * @brief SPI error treatment function
+  * @retval None
+  */
+static void SPIx_Error (void)
+{
+	/* De-initialize the SPI communication BUS */
+	HAL_SPI_DeInit(&hx3_Spi);
+
+	/* Re- Initiaize the SPI communication BUS */
+	SPIx_Init();
+}
+
+
+#if 0
 /*************************** FSMC Routines ************************************/
 /**
   * @brief  Initializes FSMC_BANK3 MSP.
@@ -1036,7 +1152,7 @@ void CAMERA_Delay(uint32_t Delay)
 {
   HAL_Delay(Delay);
 }
-
+#endif
 /******************************** LINK I2C EEPROM *****************************/
 
 /**
@@ -1087,6 +1203,157 @@ HAL_StatusTypeDef EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
   return (I2Cx_IsDeviceReady(DevAddress, Trials));
 }
 
+/******************************** LINK nRF SPI ********************************/
+/**
+  * @brief  Initializes the nRF SPI and put it into StandBy State (Ready for 
+  *         data transfer).
+  * @retval None
+  */
+HAL_StatusTypeDef nRF_SPI_IO_Init(void)
+{
+	HAL_StatusTypeDef Status = HAL_OK;
+
+	GPIO_InitTypeDef  gpioinitstruct = {0};
+
+	/* EEPROM_CS_GPIO Periph clock enable */
+	nRF_SPI_CS_GPIO_CLK_ENABLE();
+
+	/* Configure EEPROM_CS_PIN pin: EEPROM SPI CS pin */
+	gpioinitstruct.Pin    = nRF_SPI_CS_PIN|nRF_CSN_PIN;
+	gpioinitstruct.Mode   = GPIO_MODE_OUTPUT_PP;
+	gpioinitstruct.Pull   = GPIO_PULLUP;
+	gpioinitstruct.Speed  = GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+
+	gpioinitstruct.Pin	= nRF_IRQ_PIN;
+	gpioinitstruct.Mode	= GPIO_MODE_IT_FALLING;
+	gpioinitstruct.Pull	= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
+
+	/* Enable and set Eval EXTI2(PA2) Interrupt to the highest priority */
+    HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);
+    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+    
+	/* SPI nRF Config */
+	Status = SPIx_Init();
+
+	/* EEPROM chip select high */
+	nRF_SPI_CS_HIGH();
+	nRF_CSN_LOW();
+
+	return Status;
+}
+
+/**
+  * @brief  Write a byte on the nRF SPI.
+  * @param  Data: byte to send.
+  * @retval None
+  */
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data)
+{
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send the Write Reg */
+	status = SPIx_ReadWriteByte(Reg);
+
+	/* Send the Write Data */
+	SPIx_ReadWriteByte(Data);
+	
+	/*!< Deselect the nRF: Chip Select High */
+	nRF_SPI_CS_HIGH();
+	
+	return (status);
+}
+
+/**
+  * @brief  Read a byte from the nRF SPI.
+  * @retval uint8_t (The received byte).
+  */
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg)
+{
+	uint8_t data = 0;
+	
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send Read Reg */
+	SPIx_ReadWriteByte(Reg);
+	
+	/* Get the received data */
+	data = SPIx_ReadWriteByte(0xFF);
+
+	/*!< Deselect the nRF: Chip Select High */
+	nRF_SPI_CS_HIGH();
+
+	/* Return the shifted data */
+	return data;
+}
+
+/**
+  * @brief  Read data from nRF SPI driver
+  * @param  MemAddress: Internal memory address
+  * @param  pBuffer: Pointer to data buffer
+  * @param  BufferSize: Amount of data to be read
+  * @retval HAL_StatusTypeDef HAL Status
+  */
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize)
+{
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send Read Reg */
+	status = SPIx_ReadWriteByte(Reg);
+	
+	while (BufferSize--) /*!< while there is data to be read */
+	{
+		/*!< Read a byte from the nRF */
+		*pBuffer = SPIx_ReadWriteByte(0XFF);
+		/*!< Point to the next location where the byte read will be saved */
+		pBuffer++;
+	}
+
+	/*!< Deselect the nRF: Chip Select high */
+	nRF_SPI_CS_HIGH();
+
+	return status;
+}
+
+/**
+  * @brief  Write data To nRF SPI driver
+  * @param  Reg: Internal memory address
+  * @param  pBuffer: Pointer to data buffer
+  * @param  BufferSize: Amount of data to be read
+  * @retval 	nRF Status
+  */
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize)
+{
+	uint8_t status;
+	/*!< Select the nRF: Chip Select low */
+	nRF_SPI_CS_LOW();
+
+	/* Send Write Reg */
+	status = SPIx_ReadWriteByte(Reg);
+	
+	while (BufferSize--) /*!< while there is data to be write */
+	{
+		/*!< Write a byte to the nRF */
+		SPIx_ReadWriteByte(*pBuffer);
+		/*!< Point to the next location where the byte Write will be Send */
+		pBuffer++;
+	}
+
+	/*!< Deselect the nRF: Chip Select high */
+	nRF_SPI_CS_HIGH();
+
+	return status;
+}
+
+
+
 /**
   * @}
   */ 
@@ -1102,5 +1369,5 @@ HAL_StatusTypeDef EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 /**
   * @}
   */ 
-#endif    
+   
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

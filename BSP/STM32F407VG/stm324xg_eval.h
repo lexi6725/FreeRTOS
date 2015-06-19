@@ -299,6 +299,52 @@ typedef enum
 #define EVAL_I2Cx_EV_IRQn                    I2C1_EV_IRQn
 #define EVAL_I2Cx_ER_IRQn                    I2C1_ER_IRQn
 
+/*##################### SPIx ###################################*/
+#define X3_SPIx									SPI1
+#define X3_SPIx_CLK_ENABLE()					__HAL_RCC_SPI1_CLK_ENABLE()
+
+#define X3_SPIx_SCK_GPIO_PORT					GPIOA             /* PA.05*/
+#define X3_SPIx_SCK_PIN							GPIO_PIN_5
+#define X3_SPIx_SCK_GPIO_CLK_ENABLE()			__HAL_RCC_GPIOA_CLK_ENABLE()
+#define X3_SPIx_SCK_GPIO_CLK_DISABLE()			__HAL_RCC_GPIOA_CLK_DISABLE()
+
+#define X3_SPIx_MISO_MOSI_GPIO_PORT				GPIOA
+#define X3_SPIx_MISO_MOSI_GPIO_CLK_ENABLE()		__HAL_RCC_GPIOA_CLK_ENABLE()
+#define X3_SPIx_MISO_MOSI_GPIO_CLK_DISABLE()	__HAL_RCC_GPIOA_CLK_DISABLE()
+#define X3_SPIx_MISO_PIN						GPIO_PIN_6       /* PA.06*/
+#define X3_SPIx_MOSI_PIN						GPIO_PIN_7       /* PA.07*/
+
+#define X3_SPIx_TIMEOUT_MAX						1000
+
+/*##################### nRF SPI ###################################*/
+/**
+  * @brief  M25P nRF SPI Chip Select macro definition 
+  */
+#define nRF_SPI_CS_LOW()		HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_RESET)
+#define nRF_SPI_CS_HIGH()		HAL_GPIO_WritePin(nRF_SPI_CS_GPIO_PORT, nRF_SPI_CS_PIN, GPIO_PIN_SET)
+#define nRF_CSN_LOW()			HAL_GPIO_WritePin(nRF_CSN_GPIO_PORT, nRF_CSN_PIN, GPIO_PIN_RESET)
+#define nRF_CSN_HIGH()			HAL_GPIO_WritePin(nRF_CSN_GPIO_PORT, nRF_CSN_PIN, GPIO_PIN_SET)
+
+#define nRF_IRQ_STATE()			HAL_GPIO_ReadPin(nRF_IRQ_GPIO_PORT, nRF_IRQ_PIN)
+/**
+  * @brief  M25P nRF SPI Control Interface pins
+  */
+#define nRF_SPI_CS_PIN							GPIO_PIN_4        /* PA.04*/
+#define nRF_SPI_CS_GPIO_PORT					GPIOA
+#define nRF_SPI_CS_GPIO_CLK_ENABLE()			__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_SPI_CS_GPIO_CLK_DISABLE()			__HAL_RCC_GPIOA_CLK_DISABLE()
+
+#define nRF_CSN_PIN								GPIO_PIN_3        /* PA.08*/
+#define nRF_CSN_GPIO_PORT						GPIOA
+#define nRF_CSN_GPIO_CLK_ENABLE()				__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_CSN_GPIO_CLK_DISABLE()				__HAL_RCC_GPIOA_CLK_DISABLE()
+
+#define nRF_IRQ_PIN								GPIO_PIN_2
+#define nRF_IRQ_GPIO_PORT						GPIOA
+#define nRF_IRQ_CLK_ENABLE()					__HAL_RCC_GPIOA_CLK_ENABLE()
+#define nRF_IRQ_CLK_DISABLE()					__HAL_RCC_GPIOA_CLK_DISABLE()
+
+
 /**
   * @}
   */ 
