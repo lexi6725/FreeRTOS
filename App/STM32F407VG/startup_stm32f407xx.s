@@ -1,8 +1,8 @@
-;******************** (C) COPYRIGHT 2015 STMicroelectronics *********************
+;/******************** (C) COPYRIGHT 2015 STMicroelectronics ********************
 ;* File Name          : startup_stm32f407xx.s
 ;* Author             : MCD Application Team
-;* Version            : V2.3.0
-;* Date               : 02-March-2015
+;* Version            : V2.3.1
+;* Date               : 03-April-2015
 ;* Description        : STM32F407xx devices vector table for EWARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
@@ -80,10 +80,10 @@ __vector_table
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
-        DCD     SVC_Handler           	  ; SVCall Handler
+        DCD     SVC_Handler               ; SVCall Handler
         DCD     DebugMon_Handler          ; Debug Monitor Handler
         DCD     0                         ; Reserved
-        DCD     PendSV_Handler        	  ; PendSV Handler
+        DCD     PendSV_Handler            ; PendSV Handler
         DCD     SysTick_Handler           ; SysTick Handler
 
          ; External Interrupts
