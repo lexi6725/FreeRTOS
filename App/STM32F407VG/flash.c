@@ -92,8 +92,8 @@
 #include "flash.h"
 #include "serial.h"
 
-#define ledSTACK_SIZE		configMINIMAL_STACK_SIZE
-#define ledNUMBER_OF_LEDS	( 4 )
+#define ledSTACK_SIZE		30//configMINIMAL_STACK_SIZE
+#define ledNUMBER_OF_LEDS	( 1 )
 #define ledFLASH_RATE_BASE	( ( TickType_t ) 333 )
 
 /* Variable used by the created tasks to calculate the LED number to use, and
@@ -152,11 +152,11 @@ UBaseType_t uxLED;
 	{
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
-		BSP_LED_Toggle( uxLED );
+		BSP_LED_Toggle( (Led_TypeDef)uxLED );
 
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
-		BSP_LED_Toggle( uxLED );
+		BSP_LED_Toggle( (Led_TypeDef)uxLED );
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

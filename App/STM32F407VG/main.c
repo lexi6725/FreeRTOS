@@ -118,21 +118,19 @@
 #include "stm324xg_eval.h"
 #include "flash.h"
 #include "serial.h"
-#include "hmc5883l.h"
-#include "pwm.h"
 #include "serial.h"
+#include "nrf24l01.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
+#define mainRF_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
 
-static portTASK_FUNCTION_PROTO( vHMC5883LTask, pvParameters );
 
 /*-----------------------------------------------------------*/
 void SystemClock_Config(void);
 
 int main( void )
 {
-	PWM_Rate_Type rate;
 #ifdef DEBUG
   debug();
 #endif
@@ -145,6 +143,7 @@ int main( void )
 	UART_Init(115200);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
+	vStartnRFTasks(mainRF_TASK_PRIORITY);
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();

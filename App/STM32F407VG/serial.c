@@ -107,32 +107,29 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* #-1- Enable Peripherals and GPIO Clocks */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	//__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_USART1_CLK_ENABLE();
 
 	/* #-2- Configure Pheripheral GPIO Pin */
 	/* USART TX GPIO Pin (A.9) is TX Pin */
-	GPIO_InitStructure.Pin			= GPIO_PIN_9;
+	GPIO_InitStructure.Pin			= GPIO_PIN_9|GPIO_PIN_10;
 	GPIO_InitStructure.Mode			= GPIO_MODE_AF_PP;
 	GPIO_InitStructure.Pull			= GPIO_PULLUP;
-	GPIO_InitStructure.Speed		= GPIO_SPEED_HIGH;
-
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	/* USART RX GPIO Pin (A.10) Configure */
-	GPIO_InitStructure.Pin			= GPIO_PIN_10;
+	GPIO_InitStructure.Speed		= GPIO_SPEED_MEDIUM;
+	GPIO_InitStructure.Alternate	= GPIO_AF7_USART1;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	/* #-3- Configure the NVIC for UART */
-	HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
-	HAL_NVIC_EnableIRQ(USART1_IRQn);
+	//HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
+	//HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 {
 	/* #-1- Reset Peripheral */
-	__HAL_RCC_USART1_FORCE_RESET();
-	__HAL_RCC_USART1_RELEASE_RESET();
+	//__HAL_RCC_USART1_FORCE_RESET();
+	//__HAL_RCC_USART1_RELEASE_RESET();
+	__HAL_RCC_USART1_CLK_DISABLE();
 
 	/* #-2- Disable Peripherals and GPIO Clocks */
 	HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9 | GPIO_PIN_10);

@@ -750,6 +750,7 @@ static void SPIx_MspInit(SPI_HandleTypeDef *hspi)
 	gpioinitstruct.Mode		= GPIO_MODE_AF_PP;
 	gpioinitstruct.Pull		= GPIO_NOPULL;
 	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	gpioinitstruct.Alternate = GPIO_AF5_SPI1;
 	HAL_GPIO_Init(X3_SPIx_SCK_GPIO_PORT, &gpioinitstruct);
 
 	/* Configure SPI MISO and MOSI */
@@ -757,6 +758,7 @@ static void SPIx_MspInit(SPI_HandleTypeDef *hspi)
 	gpioinitstruct.Mode		= GPIO_MODE_AF_PP;
 	gpioinitstruct.Pull		= GPIO_NOPULL;
 	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	gpioinitstruct.Alternate = GPIO_AF5_SPI1;
 	HAL_GPIO_Init(X3_SPIx_MISO_MOSI_GPIO_PORT, &gpioinitstruct);
 
 	/*** Configure the SPI peripheral ***/

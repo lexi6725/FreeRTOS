@@ -23,6 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
+#include "stm32f4xx_hal_gpio.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -135,6 +136,17 @@ __weak void PendSV_Handler(void)
 __weak void SysTick_Handler(void)
 {
 }
+
+/**
+  * @brief  This function handles EXTI 2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+void EXTI2_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
+
 
 /**
   * @brief  This function handles EXTI 3 interrupt request.

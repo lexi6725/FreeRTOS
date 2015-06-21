@@ -344,6 +344,11 @@ typedef enum
 #define nRF_IRQ_CLK_ENABLE()					__HAL_RCC_GPIOA_CLK_ENABLE()
 #define nRF_IRQ_CLK_DISABLE()					__HAL_RCC_GPIOA_CLK_DISABLE()
 
+uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t BufferSize);
+uint8_t nRF_SPI_IO_ReadData(uint8_t Reg, uint8_t* pBuffer, uint32_t BufferSize);
+HAL_StatusTypeDef nRF_SPI_IO_Init(void);
+uint8_t nRF_SPI_IO_ReadReg(uint8_t Reg);
+uint8_t nRF_SPI_IO_WriteReg(uint8_t Reg, uint8_t Data);
 
 /**
   * @}
