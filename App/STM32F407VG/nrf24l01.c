@@ -216,14 +216,14 @@ uint8_t	retValue = 'A';
 		retValue++;
 		if (retValue > 'Z')
 			retValue = 'A';
-		if (nRF_Start_Rx() == nRF_TX_OK)
+		if (nRF_Start_Tx() == nRF_TX_OK)
 		{
 			BSP_LED_Toggle(LED2);
-			//if (nRF_Start_Rx() == nRF_RX_OK)
-			//{
-			//	BSP_LED_Toggle(LED3);
-			//	UART_PutString((uint8_t *)&nRF_Rx_Buf, 10);
-			//}
+			if (nRF_Start_Rx() == nRF_RX_OK)
+			{
+				BSP_LED_Toggle(LED3);
+				UART_PutString((uint8_t *)&nRF_Rx_Buf, 10);
+			}
 		}
 		
 		vTaskDelayUntil( &xLastTime, xRate );
