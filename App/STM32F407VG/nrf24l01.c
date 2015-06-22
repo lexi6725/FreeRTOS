@@ -1,7 +1,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "event_groups.h"
 /* Library includes. */
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_conf.h"
@@ -15,7 +15,8 @@
 
 const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
-static uint8_t nRF24L01_Flag = 0;
+static nRF_Tx_DataType nRF_Tx_Buf, nRF_Rx_Buf;
+EventGroupHandle_t xEventGruop;
 
 uint8_t nRF_Check(void)
 {
@@ -69,75 +70,103 @@ void nRF_TX_Mode(void)
 	
 	/*!< Deselect the nRF: Chip Select high */
 	nRF_CSN_HIGH();
-	nRF24L01_Flag &= ~(nRF_TX_OK|nRF_MAX_TX);
 	
 }
 
-uint8_t nRF_TxPacket(uint8_t *txbuf)
+/**
+  * @brief 软件触发中断，进入中断发送数据
+  * @param  None
+  * retval   None
+  */
+uint8_t nRF_Start_Tx(void)
 {
-	uint8_t status;
-
+	BaseType_t uxBits;
+	const TickType_t xTicksToWait = 3;		// Time Out 3ms
+	
+	// Entry TX Mode to Send Data
+	nRF_TX_Mode();
+	
 	/*!< Select the nRF: Chip Select low */
 	nRF_CSN_LOW();
 	
 	nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
 
-	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, txbuf, nRF_TX_PLOAD_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, (uint8_t *)&nRF_Tx_Buf, nRF_TX_PLOAD_WIDTH);
 	
 	/*!< Deselect the nRF: Start Send */
 	nRF_CSN_HIGH();
 
-	while(!(nRF24L01_Flag & nRF_TX_OK));
-
-	if (nRF24L01_Flag& nRF_MAX_TX)
+	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_TX_OK|nRF_State_TX_MAX, pdTRUE, pdFALSE, xTicksToWait);
+	if (uxBits & nRF_State_TX_OK)
+	{
+		nRF_RX_Mode();
+		return nRF_TX_OK;
+	}
+	else if ( uxBits & nRF_State_TX_MAX)
 	{
 		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
 		nRF_CSN_HIGH();
 		return nRF_MAX_TX;
 	}
-	if (nRF24L01_Flag& nRF_TX_OK)
+	else
 	{
-		nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, status);
-		return nRF_TX_OK;
-	}
-
-	return status;
-}
-
-uint8_t nRF_RxPacket(uint8_t *rxbuf)
-{
-	uint8_t status;
-
-	status = nRF_SPI_IO_ReadReg(nRF_STATUS);
-	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, status);
-	if (status & nRF_RX_OK)
-	{
-		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, rxbuf, nRF_RX_PLOAD_WIDTH);
 		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
 		nRF_CSN_HIGH();
-		return 0;
+		return nRF_TIMEOUT;
 	}
-	nRF_CSN_LOW();
-	nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
-	nRF_CSN_HIGH();
-	status = nRF_SPI_IO_ReadReg(nRF_FIFO_STATUS);
-
-	return status;
 }
 
+uint8_t nRF_Start_Rx(void)
+{
+	BaseType_t uxBits;
+	const TickType_t xTickToWait = 3;		// Time Out 3ms
+
+	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_RX_OK, pdTRUE, pdFALSE, xTickToWait);
+
+	if (uxBits & nRF_State_RX_OK)
+	{
+		nRF_TX_Mode();
+		return nRF_RX_OK;
+	}
+	else
+	{
+		return nRF_TIMEOUT;
+	}
+}
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	BaseType_t xResult, xHigherPriorityTaskWoken;
 	uint8_t RegValue;
+
 	RegValue = nRF_SPI_IO_ReadReg(nRF_STATUS);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, RegValue);
+	
+	xHigherPriorityTaskWoken = pdFALSE;
+	
 	if (RegValue & nRF_TX_OK)
-		nRF24L01_Flag |= nRF_TX_OK;
+	{
+		xResult = xEventGroupSetBitsFromISR(xEventGruop, nRF_State_TX_OK, &xHigherPriorityTaskWoken);
+	}
 	else if(RegValue & nRF_MAX_TX)
-		nRF24L01_Flag |= nRF_MAX_TX;
-	RegValue = nRF_SPI_IO_ReadReg(nRF_FIFO_STATUS);
+	{
+		xResult = xEventGroupSetBitsFromISR(xEventGruop, nRF_State_TX_MAX, &xHigherPriorityTaskWoken);
+	}
+	if (RegValue & nRF_RX_OK)
+	{
+		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Rx_Buf, nRF_RX_PLOAD_WIDTH);
+		nRF_CSN_LOW();
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0x00);
+		nRF_CSN_HIGH();
+		xResult = xEventGroupSetBitsFromISR(xEventGruop, nRF_State_RX_OK, &xHigherPriorityTaskWoken);
+	}
+	
+	if (xResult != pdFAIL)
+	{
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
 }
 
 
@@ -155,13 +184,7 @@ void vStartnRFTasks( UBaseType_t uxPriority )
 static portTASK_FUNCTION( vnRFTask, pvParameters )
 {
 TickType_t xRate, xLastTime;
-uint8_t	retValue;
-uint8_t c = 'A';
-#if defined(TX_SEND)
-uint8_t buf[33] = "Tx Send  \n";
-#else
-uint8_t buf[33];
-#endif
+uint8_t	retValue = 'A';
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
@@ -172,61 +195,38 @@ uint8_t buf[33];
 	delay is only half the total period. */
 	xRate /= ( TickType_t ) 2;
 
+	/* 创建事件以同步中断与任务*/
+	xEventGruop = xEventGroupCreate();
+
 	/* We need to initialise xLastFlashTime prior to the first call to 
 	vTaskDelayUntil(). */
 	xLastTime = xTaskGetTickCount();
 
 	for(;;)
 	{
-		vTaskDelayUntil( &xLastTime, xRate );
-		//if (nRF_Check() == HAL_OK)
+		if (xEventGruop == NULL)
 		{
-			#if defined(TX_SEND)
-			nRF_TX_Mode();
-			c++;
-			if (c >= 'Z')
-				c = 'A';
-			buf[8] = c;
-			if ((retValue = nRF_TxPacket(buf))== nRF_TX_OK)
-			{
-				BSP_LED_Toggle(LED2);
-				UART_PutString(buf, 10);\
-			}
-			else if (retValue == nRF_MAX_TX)
-			{
-				UART_PutString("Max TX\n", 7);
-			}
-			//vTaskDelayUntil( &xLastTime, 1);
-			//nRF_RX_Mode();
-			//if (nRF_RxPacket(buf) == 0)
-			//{
-			//	BSP_LED_Off(LED2);
-			//	UART_PutString(buf, 12);
-			//}
-			#else
-			nRF_RX_Mode();
-			vTaskDelayUntil(&xLastTime, 1);
-			memset(buf, 0, 33);
-			if ((retValue = nRF_RxPacket(buf)) == 0)
-			{
-				BSP_LED_Toggle(LED2);
-				UART_PutString(buf, 12);
-				//vTaskDelayUntil( &xLastTime, xRate);
-			}
-			else
-			{
-				//vTaskDelayUntil( &xLastTime, xRate);
-				UART_PutString("Rev Err\n", 8);
-			}
-			//vTaskDelayUntil( &xLastTime, 1);
-			//nRF_TX_Mode();
-			//if (nRF_TxPacket(buf)== nRF_TX_OK)
-			//{
-			//	BSP_LED_Off(LED2);
-			//	UART_PutString(buf, 12);
-			//}
-			#endif
+			xEventGruop = xEventGroupCreate();
+			continue;
 		}
+
+		nRF_Tx_Buf.datatype = 'T';
+		memcpy(&nRF_Tx_Buf.data, "x Send  \n", 9);
+		nRF_Tx_Buf.data[7] = retValue;
+		retValue++;
+		if (retValue > 'Z')
+			retValue = 'A';
+		if (nRF_Start_Rx() == nRF_TX_OK)
+		{
+			BSP_LED_Toggle(LED2);
+			//if (nRF_Start_Rx() == nRF_RX_OK)
+			//{
+			//	BSP_LED_Toggle(LED3);
+			//	UART_PutString((uint8_t *)&nRF_Rx_Buf, 10);
+			//}
+		}
+		
+		vTaskDelayUntil( &xLastTime, xRate );
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

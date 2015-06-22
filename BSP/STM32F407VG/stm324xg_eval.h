@@ -252,13 +252,21 @@ typedef enum
 /**
   * @brief Joystick Pins definition 
   */ 
-#define JOY_SEL_PIN                  IO_PIN_7
-#define JOY_DOWN_PIN                 IO_PIN_6
-#define JOY_LEFT_PIN                 IO_PIN_5
-#define JOY_RIGHT_PIN                IO_PIN_4
-#define JOY_UP_PIN                   IO_PIN_3
-#define JOY_NONE_PIN                 JOY_ALL_PINS
-#define JOY_ALL_PINS                 (IO_PIN_3 | IO_PIN_4 | IO_PIN_5 | IO_PIN_6 | IO_PIN_7)
+#define JOY_SEL_PIN					GPIO_PIN_0
+#define JOY_RIGHT_PIN				GPIO_PIN_1
+#define JOY_SEL_RIGHT_GPIO_PORT		GPIOA
+#define JOY_SEL_RIGHT_CLK_ENABLE()	__GPIOA_CLK_ENABLE()
+#define JOY_SEL_RIGHT_CLK_DISABLE()	__GPIOA_CLK_DISABLE()
+
+#define JOY_LEFT_PIN				GPIO_PIN_2
+#define JOY_UP_PIN					GPIO_PIN_3
+#define JOY_DOWN_PIN				GPIO_PIN_4
+#define JOY_LEFT_UP_DOWN_GPIO_PORT	GPIOC
+#define JOY_LEFT_UP_DOWN_CLK_ENABLE()	__GPIOC_CLK_ENABLE()
+#define JOY_LEFT_UP_DOWN_CLK_DISABLE()	__GPIOC_CLK_DISABLE()
+
+//#define JOY_NONE_PIN                 JOY_ALL_PINS
+//#define JOY_ALL_PINS                 (IO_PIN_3 | IO_PIN_4 | IO_PIN_5 | IO_PIN_6 | IO_PIN_7)
 
 /* Exported constantIO -------------------------------------------------------*/
 /* I2C clock speed configuration (in Hz) 

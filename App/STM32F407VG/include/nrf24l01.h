@@ -31,6 +31,7 @@
 #define nRF_MAX_TX  		0x10  //达到最大发送次数中断
 #define nRF_TX_OK   		0x20  //TX发送完成中断
 #define nRF_RX_OK   		0x40  //接收到数据中断
+#define nRF_TIMEOUT			0x80  // 超时标志
 
 #define nRF_OBSERVE_TX      0x08  //发送检测寄存器,bit7:4,数据包丢失计数器;bit3:0,重发计数器
 #define nRF_CD              0x09  //载波检测寄存器,bit0,载波检测;
@@ -49,6 +50,17 @@
 #define nRF_RX_PW_P5        0x16  //接收数据通道5有效数据宽度(1~32字节),设置为0则非法
 #define nRF_FIFO_STATUS     0x17  //FIFO状态寄存器;bit0,RX FIFO寄存器空标志;bit1,RX FIFO满标志;bit2,3,保留
                               //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
+
+/* nRF24L01 Event Bit Map */
+#define nRF_State_TX_OK		(0x01<<1)		// 1. 发送数据成功
+#define nRF_State_TX_MAX	(0x01<<2)		// 1. 发送数据最大次数
+#define nRF_State_RX_OK		(0x01<<3)		// 1. 接收数据成功
+
+typedef struct
+{
+	uint8_t datatype;
+	uint8_t data[nRF_TX_PLOAD_WIDTH-1];
+} nRF_Tx_DataType;
 
 void vStartnRFTasks( UBaseType_t uxPriority );
 
