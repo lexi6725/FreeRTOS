@@ -1354,8 +1354,50 @@ uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t Buffe
 	return status;
 }
 
+#if defined(JOY_BUTTON_MODULE)
+/**
+  * @brief Configure JOY BUTTON GPIO and EXTI Line.
+  * @param  None
+  * @retval None
+  */
+void BSP_Button_Init(void)
+{
+	GPIO_InitTypeDef gpioinitstruct = {0};
 
+	/* Enable the corresponding JOY Button Clock */
+	JOY_SEL_RIGHT_CLK_ENABLE();
+	JOY_LEFT_UP_DOWN_CLK_ENABLE();
 
+	/* Configure Button pin as input */
+	gpioinitstruct.Pin		= JOY_SEL_PIN|JOY_RIGHT_PIN;
+	gpioinitstruct.Pull		= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	gpioinitstruct.Mode		= GPIO_MODE_IT_FALLING;
+	HAL_GPIO_Init(JOY_SEL_RIGHT_GPIO_PORT, &gpioinitstruct);
+
+	gpioinitstruct.Pin		= JOY_LEFT_PIN|JOY_UP_PIN|JOY_DOWN_PIN;
+	gpioinitstruct.Pull		= GPIO_NOPULL;
+	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
+	gpioinitstruct.Mode		= GPIO_MODE_IT_FALLING;
+	HAL_GPIO_Init(JOY_LEFT_UP_DOWN_GPIO_PORT, &gpioinitstruct);
+
+	/* Enable and set button EXTI Interrupt to the lowest priority */
+	HAL_NVIC_SetPriority(EXTI0_IRQn, 0x0F,0);
+	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+	HAL_NVIC_SetPriority(EXTI1_IRQn, 0x0F, 0);
+	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+	
+	HAL_NVIC_SetPriority(EXTI2_IRQn, 0x0F, 0);
+	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+	
+	HAL_NVIC_SetPriority(EXTI3_IRQn, 0x0F, 0);
+	HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+	
+	HAL_NVIC_SetPriority(EXTI4_IRQn, 0x0F, 0);
+	HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+}
+#endif
 /**
   * @}
   */ 
