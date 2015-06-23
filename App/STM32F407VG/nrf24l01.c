@@ -47,6 +47,7 @@ void nRF_RX_Mode(void)
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RF_SETUP, 0x0F);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_CONFIG, 0x0F);
 	
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, 0xFF);
 	/*!< Deselect the nRF: Chip Select high */
 	nRF_SPI_CS_HIGH();
 }
@@ -68,6 +69,7 @@ void nRF_TX_Mode(void)
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RX_PW_P0, nRF_RX_PLOAD_WIDTH);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_CONFIG, 0x0E);
 	
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, 0xFF);
 	/*!< Deselect the nRF: Chip Select high */
 	nRF_CSN_HIGH();
 	
@@ -105,14 +107,14 @@ uint8_t nRF_Start_Tx(void)
 	else if ( uxBits & nRF_State_TX_MAX)
 	{
 		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 		nRF_CSN_HIGH();
 		return nRF_MAX_TX;
 	}
 	else
 	{
 		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0x00);
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 		nRF_CSN_HIGH();
 		return nRF_TIMEOUT;
 	}
@@ -142,7 +144,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	uint8_t RegValue;
 
 	RegValue = nRF_SPI_IO_ReadReg(nRF_STATUS);
-	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, RegValue);
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_STATUS, 0xFF);
 	
 	xHigherPriorityTaskWoken = pdFALSE;
 	
@@ -158,7 +160,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	{
 		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Rx_Buf, nRF_RX_PLOAD_WIDTH);
 		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0x00);
+		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
 		nRF_CSN_HIGH();
 		xResult = xEventGroupSetBitsFromISR(xEventGruop, nRF_State_RX_OK, &xHigherPriorityTaskWoken);
 	}
@@ -190,7 +192,7 @@ uint8_t	retValue = 'A';
 	( void ) pvParameters;
 
 	nRF_SPI_IO_Init();
-	xRate = 300;
+	xRate = 10;
 	/* We will turn the LED on and off again in the delay period, so each
 	delay is only half the total period. */
 	xRate /= ( TickType_t ) 2;
