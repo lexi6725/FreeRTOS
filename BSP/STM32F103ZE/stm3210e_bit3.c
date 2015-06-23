@@ -1080,13 +1080,13 @@ HAL_StatusTypeDef nRF_SPI_IO_Init(void)
 	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
 
 	gpioinitstruct.Pin	= nRF_IRQ_PIN;
-	gpioinitstruct.Mode	= GPIO_MODE_EVT_FALLING;
+	gpioinitstruct.Mode	= GPIO_MODE_IT_FALLING;
 	gpioinitstruct.Pull	= GPIO_NOPULL;
 	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(nRF_SPI_CS_GPIO_PORT, &gpioinitstruct);
 
 	/* Enable and set Eval EXTI2(PA2) Interrupt to the highest priority */
-    HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);
+    HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 1);
     HAL_NVIC_EnableIRQ(EXTI2_IRQn);
     
 	/* SPI nRF Config */
