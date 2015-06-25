@@ -8,7 +8,7 @@
 #include "stm32f1xx_hal.h"
 #include "nrf24l01.h"
 #include "stm3210e_bit3.h"
-
+#include "pwm.h"
 
 #include "serial.h"
 
@@ -16,7 +16,7 @@
 
 const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
-static nRF_Tx_DataType nRF_Tx_Buf, nRF_Rx_Buf;
+static nRF_Tx_DataType nRF_Buf;
 EventGroupHandle_t xEventGruop;
 
 uint8_t nRF_Check(void)
@@ -95,7 +95,7 @@ uint8_t nRF_Start_Tx(void)
 	
 	nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 
-	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, (uint8_t *)&nRF_Tx_Buf, nRF_TX_PLOAD_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, (uint8_t *)&nRF_Buf, nRF_TX_PLOAD_WIDTH);
 	
 	/*!< Deselect the nRF: Start Send */
 	nRF_CSN_HIGH();
@@ -165,7 +165,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	}
 	if (RegValue & nRF_RX_OK)
 	{
-		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Rx_Buf, nRF_RX_PLOAD_WIDTH);
+		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Buf, nRF_RX_PLOAD_WIDTH);
 		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
 		nRF_CSN_HIGH();
@@ -176,6 +176,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	{
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
+}
+
+uint8_t CommProcess(void)
+{
+	uint8_t Type;
+
+	Type = nRF_Buf.datatype & 0xF0;
+
+	switch(Type)
+	{
+		case DataType_Key:
+			return PWM_Ctr_Dir((PWM_Ctr_Type *)&nRF_Buf);
+		default:
+			return HAL_ERROR;		
+	}
+
+	return HAL_ERROR;
 }
 
 
@@ -211,6 +228,9 @@ uint8_t	retValue = 'A';
 	vTaskDelayUntil(). */
 	xLastTime = xTaskGetTickCount();
 
+	nRF_RX_Mode();
+	vTaskDelay(1);
+	
 	for(;;)
 	{
 		if (xEventGruop == NULL)
@@ -219,40 +239,18 @@ uint8_t	retValue = 'A';
 			continue;
 		}
 		
-		vTaskDelayUntil( &xLastTime, xRate );
-		#if defined(TX_SEND)
-			nRF_Tx_Buf.datatype = 'T';
-			memcpy(&nRF_Tx_Buf.data, "x Send  \n", 9);
-			nRF_Tx_Buf.data[7] = retValue;
-			retValue++;
-			if (retValue > 'Z')
-				retValue = 'A';
-			if (nRF_Start_Tx() == nRF_TX_OK)
-			{
-				BSP_LED_Toggle(LED2);
-				UART_PutString((uint8_t *)&nRF_Tx_Buf, 10);
-				if (nRF_Start_Rx() == nRF_RX_OK)
-				{
-					BSP_LED_Toggle(LED2);
-					UART_PutString((uint8_t *)&nRF_Rx_Buf, 10);
-				}
-			}
-		#else
-		nRF_RX_Mode();
-		vTaskDelay(1);
 		if (nRF_Start_Rx() == nRF_RX_OK)
 		{
 			BSP_LED_Toggle(LED2);
-			UART_PutString((uint8_t *)&nRF_Rx_Buf, 10);
-			memcpy(&nRF_Tx_Buf, &nRF_Rx_Buf, nRF_TX_PLOAD_WIDTH);
-			nRF_Tx_Buf.datatype = 'R';
-			if (nRF_Start_Tx() == nRF_TX_OK)
+			if (CommProcess() == HAL_OK)
 			{
-				BSP_LED_Toggle(LED2);
-				UART_PutString((uint8_t *)&nRF_Tx_Buf, 10);
+				nRF_Buf.datatype |= 0x08;
+				if (nRF_Start_Tx() == nRF_TX_OK)
+				{
+					BSP_LED_Toggle(LED2);
+				}
 			}
 		}
-		#endif
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

@@ -1916,6 +1916,9 @@
       <name>$PROJ_DIR$\..\..\App\STM32F407VG\flash.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F407VG\key.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\App\STM32F407VG\main.c</name>
     </file>
     <file>

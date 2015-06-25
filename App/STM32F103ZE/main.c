@@ -134,6 +134,7 @@ void SystemClock_Config(void);
 int main( void )
 {
 	PWM_Rate_Type rate;
+	PWM_Ctr_Type ctr;
 #ifdef DEBUG
   debug();
 #endif
@@ -143,9 +144,12 @@ int main( void )
 	BSP_LED_Init(LED2);
 	//xSerialPortInitMinimal(115200, 20);
 	PWM_GPIO_Init();
-	rate.left_rate	= 20;
-	rate.right_rate = 80;
-	PWM_TIM_Config(100000, rate);
+	rate.left_rate	= 50;
+	rate.right_rate = 50;
+	PWM_TIM_Config(rate);
+	ctr.type = 0x10;
+	ctr.data[0] = (DIR_UP);
+	PWM_Ctr_Dir(&ctr);
 	UART_Init(115200);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );

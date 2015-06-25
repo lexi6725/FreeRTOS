@@ -56,6 +56,9 @@
 #define nRF_State_TX_MAX	(0x01<<2)		// 1. 发送数据最大次数
 #define nRF_State_RX_OK		(0x01<<3)		// 1. 接收数据成功
 
+/* DataType Define */
+#define DataType_Key	(0x10)
+
 typedef struct
 {
 	uint8_t datatype;

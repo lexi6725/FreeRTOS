@@ -1,8 +1,39 @@
 #ifndef __PWM_H_
 #define __PWM_H_
 
+#define PWM_FREQ		100000
 #define PWM_PERIOD		100				// PWMÊä³öÆµÂÊ
 #define PWM_TIM			TIM4			// Use TIMx for PWM
+#define PWM_MIN_RATE	10
+
+#define PWM_START		(0x01<<0)
+#define PWM_DOWN		(0x01<<0)
+
+#define PWM_LEFT_PIN		GPIO_PIN_8
+#define PWM_RITHT_PIN		GPIO_PIN_9
+#define PWM_GPIO_PORT		GPIOB
+#define PWM_CLK_ENABLE()	__HAL_RCC_GPIOB_CLK_ENABLE()
+#define PWM_CLK_DISABEL()	__HAL_RCC_GPIOB_CLK_DISABLE()
+#define PWM_CLK_AF_CLK_ENABLE()	__HAL_RCC_AFIO_CLK_ENABLE()
+#define PWM_CLK_AF_CLK_DISABLE()	__HAL_RCC_AFIO_CLK_DISABLE()
+#define PWM_TIM_CLK_ENABLE()	__HAL_RCC_TIM4_CLK_ENABLE()
+#define PWM_TIM_CLK_DISABLE()	__HAL_RCC_TIM4_CLK_DISABLE()
+
+#define PWM_CTR_LEFT_PIN		GPIO_PIN_11
+#define PWM_CTR_RIGHT_PIN		GPIO_PIN_12
+#define PWM_CTR_GPIO_PORT		GPIOD
+#define PWM_CTR_CLK_ENABLE()	__HAL_RCC_GPIOD_CLK_ENABLE()
+#define PWM_CTR_CLK_DISABLE()	__HAL_RCC_GPIOD_CLK_DISABLE()
+
+/* KeyStatus Flag */
+#define Key_K2				(0x01<<0)
+#define Key_K3				(0x01<<1)
+#define DIR_LEFT			(0x01<<2)
+#define DIR_UP				(0x01<<3)
+#define DIR_DOWN			(0x01<<4)
+#define Key_K1				(0x01<<5)
+#define DIR_SEL				(0x01<<6)
+#define DIR_RIGHT			(0x01<<7)
 
 typedef struct
 {
@@ -10,7 +41,14 @@ typedef struct
 	uint16_t	right_rate;
 } PWM_Rate_Type;
 
+typedef struct 
+{
+	uint8_t type;
+	uint8_t data[4];
+} PWM_Ctr_Type;
+
 extern void PWM_GPIO_Init(void);
-extern void PWM_TIM_Config(uint32_t Freq, PWM_Rate_Type rate);
+extern void PWM_TIM_Config(PWM_Rate_Type rate);
+uint8_t PWM_Ctr_Dir(PWM_Ctr_Type * ctr);
 
 #endif

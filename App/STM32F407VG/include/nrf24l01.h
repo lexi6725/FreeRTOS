@@ -55,6 +55,11 @@
 #define nRF_State_TX_OK		(0x01<<1)		// 1. 发送数据成功
 #define nRF_State_TX_MAX	(0x01<<2)		// 1. 发送数据最大次数
 #define nRF_State_RX_OK		(0x01<<3)		// 1. 接收数据成功
+#define Key_State_Down		(0x01<<4)		// 1. 有按键被按下
+
+/* DataType Define */
+#define DataType_Key	(0x10)
+
 
 typedef struct
 {
@@ -63,5 +68,6 @@ typedef struct
 } nRF_Tx_DataType;
 
 void vStartnRFTasks( UBaseType_t uxPriority );
+void nRF_IRQ_ISR(void);
 
 #endif

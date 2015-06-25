@@ -107,6 +107,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "event_groups.h"
 #include "main.h"
 
 /* Library includes. */
@@ -118,12 +119,13 @@
 #include "stm324xg_eval.h"
 #include "flash.h"
 #include "serial.h"
-#include "serial.h"
+#include "key.h"
 #include "nrf24l01.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
 #define mainRF_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
+#define mainKey_TASK_PRIORITY				( tskIDLE_PRIORITY + 3 )
 
 
 /*-----------------------------------------------------------*/
@@ -144,6 +146,7 @@ int main( void )
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	vStartnRFTasks(mainRF_TASK_PRIORITY);
+	vStartKeyTasks(mainKey_TASK_PRIORITY);
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
