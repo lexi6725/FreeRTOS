@@ -180,30 +180,27 @@ static portTASK_FUNCTION_PROTO( vnRFTask, pvParameters );
 
 void vStartnRFTasks( UBaseType_t uxPriority )
 {
+	/* 创建事件以同步中断与任务*/
+	xEventGruop = xEventGroupCreate();
+	
 	xTaskCreate( vnRFTask, "nRF", configMINIMAL_STACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 }
 /*-----------------------------------------------------------*/
 
 static portTASK_FUNCTION( vnRFTask, pvParameters )
 {
-//TickType_t xRate, xLastTime;
+TickType_t xRate, xLastTime;
 BaseType_t	Event_Status = 0;
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
 
 	nRF_SPI_IO_Init();
-	//xRate = 10;
-	/* We will turn the LED on and off again in the delay period, so each
-	delay is only half the total period. */
-	//xRate /= ( TickType_t ) 2;
-
-	/* 创建事件以同步中断与任务*/
-	xEventGruop = xEventGroupCreate();
+	xRate = 10;
 
 	/* We need to initialise xLastFlashTime prior to the first call to 
 	vTaskDelayUntil(). */
-	//xLastTime = xTaskGetTickCount();
+	xLastTime = xTaskGetTickCount();
 
 	for(;;)
 	{
@@ -234,7 +231,7 @@ BaseType_t	Event_Status = 0;
 		}
 		
 		memset(&nRF_Buf, 0, sizeof(nRF_Tx_DataType));
-		//vTaskDelayUntil( &xLastTime, xRate );
+		vTaskDelayUntil( &xLastTime, xRate );
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

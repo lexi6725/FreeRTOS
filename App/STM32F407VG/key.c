@@ -68,7 +68,8 @@ void Key_Scan(void)
 			if(!(KeyStatus&(0x01<<index)))
 			{
 				KeyStatus |= (0x01<<index);
-				flag = 1;
+				if (index < (KEYNUMPC-1))	// K1作为功能键，激发第二功能
+					flag = 1;
 			}
 		}
 		else
@@ -76,7 +77,7 @@ void Key_Scan(void)
 			if (KeyStatus & (0x01<<index))
 			{
 				KeyStatus &= ~(0x01<<index);
-				flag = 1;
+				//flag = 1;
 			}
 		}
 	}
@@ -97,11 +98,11 @@ void Key_Scan(void)
 			if (KeyStatus & (0x01<<(index+KEYNUMPC)))
 			{
 				KeyStatus &= ~(0x01<<(index+KEYNUMPC));
-				flag = 1;
+				//flag = 1;
 			}
 		}
 	}
-	if (flag)
+	if (flag && xEventGruop)
 		xEventGroupSetBits(xEventGruop, Key_State_Down);
 }
 
@@ -123,7 +124,6 @@ TickType_t xRate, xLastTime;
 	/* We need to initialise xLastFlashTime prior to the first call to 
 	vTaskDelayUntil(). */
 	xLastTime = xTaskGetTickCount();
-	vTaskDelay(100);
 	
 	for(;;)
 	{
