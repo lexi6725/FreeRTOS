@@ -10,7 +10,7 @@
 
 TIM_HandleTypeDef 	htim4;
 PWM_Rate_Type		pwm_rate = {0, 0};
-uint8_t pwmState 	= 0;
+uint8_t pwmState 	= PWM_START;
 
 void PWM_GPIO_Init(void)
 {
@@ -19,6 +19,7 @@ void PWM_GPIO_Init(void)
 	PWM_CLK_ENABLE();
 	PWM_TIM_CLK_ENABLE();
 	PWM_CLK_AF_CLK_ENABLE();
+	PWM_CTR_CLK_ENABLE();
 
 	/* GPIOB Configure: TIM4 Channel 3 and 4 alternate function push-pull */
 	GPIO_InitStructure.Pin		= PWM_LEFT_PIN | PWM_RITHT_PIN;
@@ -28,7 +29,7 @@ void PWM_GPIO_Init(void)
 	HAL_GPIO_Init(PWM_GPIO_PORT, &GPIO_InitStructure);
 
 	/* GPIOD Configure Direct Ctr */
-	GPIO_InitStructure.Pin		= PWM_CTR_LEFT_PIN | PWM_CTR_RIGHT_PIN;
+	GPIO_InitStructure.Pin		= PWM_CTR_LEFT1_PIN | PWM_CTR_LEFT2_PIN|PWM_CTR_RIGHT1_PIN|PWM_CTR_RIGHT2_PIN;
 	GPIO_InitStructure.Mode		= GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStructure.Pull		= GPIO_NOPULL;
 	GPIO_InitStructure.Speed	= GPIO_SPEED_HIGH;
@@ -86,77 +87,57 @@ void PWM_TIM_Config(PWM_Rate_Type rate)
 
 uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 {
-	if (ctr->type&0xF0 != DataType_Key)
+	if (ctr->type != DataType_Key)
 		return HAL_ERROR;
 
-	if (ctr->data[0] & KEY_SPD)
+	if ((ctr->data[0] & KEY_SPD_RDC) == (KEY_SPD_RDC))
 	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
+		pwm_rate.left_rate -= PWM_PERIOD/20;
+		pwm_rate.right_rate -= PWM_PERIOD/20;
+		PWM_TIM_Config(pwm_rate);
+	}
+	else if (ctr->data[0] & KEY_SPD_ADD)
+	{
+		//HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_SET);
+		//HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_RESET);
 		pwm_rate.left_rate += PWM_PERIOD/20;
 		pwm_rate.right_rate += PWM_PERIOD/20;
 		PWM_TIM_Config(pwm_rate);
 	}
+	else if (ctr->data[0] & KEY_UP)
+	{
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT1_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT2_PIN, GPIO_PIN_RESET);
+	}
 	else if (ctr->data[0] & KEY_DOWN)
 	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
-		//pwm_rate.left_rate -= PWM_PERIOD/20;
-		//pwm_rate.right_rate -= PWM_PERIOD/20;
-		//PWM_TIM_Config(pwm_rate);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT2_PIN, GPIO_PIN_SET);
 	}
 	else if(ctr->data[0] & KEY_LEFT)
 	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
-		if (pwm_rate.left_rate > pwm_rate.right_rate)
-			pwm_rate.right_rate = pwm_rate.left_rate;
-		else
-			pwm_rate.left_rate = pwm_rate.right_rate;
-		PWM_TIM_Config(pwm_rate);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT1_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT2_PIN, GPIO_PIN_RESET);
 	}
 	else if(ctr->data[0] & KEY_RIGHT)
 	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_RESET);
-		if (pwm_rate.left_rate > pwm_rate.right_rate)
-			pwm_rate.right_rate = pwm_rate.left_rate;
-		else
-			pwm_rate.left_rate = pwm_rate.right_rate;
-		PWM_TIM_Config(pwm_rate);
-	}
-	else if (ctr->data[0] & KEY_UP)
-	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
-		if (pwm_rate.left_rate > pwm_rate.right_rate)
-			pwm_rate.right_rate = pwm_rate.left_rate;
-		else
-			pwm_rate.left_rate = pwm_rate.right_rate;
-		PWM_TIM_Config(pwm_rate);
-	}
-	else if (ctr->data[0] & (KEY_SPD|KEY_Fn) == (KEY_SPD|KEY_Fn))
-	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_RESET);
-		if (pwm_rate.left_rate > pwm_rate.right_rate)
-			pwm_rate.right_rate = pwm_rate.left_rate;
-		else
-			pwm_rate.left_rate = pwm_rate.right_rate;
-		PWM_TIM_Config(pwm_rate);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT2_PIN, GPIO_PIN_SET);
 	}
 	else if (ctr->data[0] & KEY_BRK)
 	{
-		if (pwmState & PWM_START)
-		{
-			HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
-			HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
-		}
-		else
-		{
-			HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-			HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-		}
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT2_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT1_PIN, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT2_PIN, GPIO_PIN_RESET);
 	}
 	return HAL_OK;
 }

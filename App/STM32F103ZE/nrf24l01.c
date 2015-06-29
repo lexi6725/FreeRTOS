@@ -183,11 +183,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 uint8_t CommProcess(void)
 {
-	uint8_t Type;
 
-	Type = nRF_Buf.datatype & 0xF0;
-
-	switch(Type)
+	switch(nRF_Buf.datatype)
 	{
 		case DataType_Key:
 			return PWM_Ctr_Dir((PWM_Ctr_Type *)&nRF_Buf);

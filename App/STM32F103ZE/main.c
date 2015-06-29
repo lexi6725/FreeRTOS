@@ -147,9 +147,9 @@ int main( void )
 	rate.left_rate	= 50;
 	rate.right_rate = 50;
 	PWM_TIM_Config(rate);
-	ctr.type = 0x10;
-	ctr.data[0] = (DIR_UP);
-	PWM_Ctr_Dir(&ctr);
+	ctr.type = DataType_Key;
+	ctr.data[0] = (KEY_UP);
+	//PWM_Ctr_Dir(&ctr);
 	UART_Init(115200);
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );

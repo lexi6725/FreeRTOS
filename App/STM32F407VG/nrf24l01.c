@@ -102,6 +102,7 @@ uint8_t nRF_Start_Tx(void)
 	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_TX_OK|nRF_State_TX_MAX, pdTRUE, pdFALSE, xTicksToWait);
 	if (uxBits & nRF_State_TX_OK)
 	{
+		nRF_RX_Mode();
 		RetValue = nRF_TX_OK;
 	}
 	else if ( uxBits & nRF_State_TX_MAX)
@@ -118,7 +119,7 @@ uint8_t nRF_Start_Tx(void)
 		nRF_CSN_HIGH();
 		RetValue = nRF_TIMEOUT;
 	}
-	nRF_RX_Mode();
+	
 	return RetValue;
 }
 
@@ -215,7 +216,7 @@ BaseType_t	Event_Status = 0;
 			continue;
 		}
 
-		Event_Status = xEventGroupWaitBits(xEventGruop, Key_State_Down, pdTRUE, pdFALSE, (TickType_t)50);
+		Event_Status = xEventGroupWaitBits(xEventGruop, Key_State_Down, pdTRUE, pdFALSE, (TickType_t)1000);
 		if (Event_Status & Key_State_Down)
 		{
 			nRF_Buf.datatype = DataType_Key;
