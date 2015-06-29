@@ -97,7 +97,7 @@ void Key_Scan(void)
 			if (KeyStatus & (0x01<<(index+KEYNUMPC)))
 			{
 				KeyStatus &= ~(0x01<<(index+KEYNUMPC));
-				flag = 1;
+				//flag = 1;
 			}
 		}
 	}

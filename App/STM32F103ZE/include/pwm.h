@@ -26,14 +26,15 @@
 #define PWM_CTR_CLK_DISABLE()	__HAL_RCC_GPIOD_CLK_DISABLE()
 
 /* KeyStatus Flag */
-#define Key_K2				(0x01<<0)
-#define Key_K3				(0x01<<1)
-#define DIR_LEFT			(0x01<<2)
-#define DIR_UP				(0x01<<3)
-#define DIR_DOWN			(0x01<<4)
-#define Key_K1				(0x01<<5)
-#define DIR_SEL				(0x01<<6)
-#define DIR_RIGHT			(0x01<<7)
+#define KEY_BRK				(0x01<<0)
+#define KEY_SPD				(0x01<<1)
+#define KEY_LEFT			(0x01<<2)
+#define KEY_UP				(0x01<<3)
+#define KEY_DOWN			(0x01<<4)
+#define KEY_Fn				(0x01<<5)
+#define KEY_SEL				(0x01<<6)
+#define KEY_RIGHT			(0x01<<7)
+
 
 typedef struct
 {

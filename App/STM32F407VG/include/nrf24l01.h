@@ -58,7 +58,7 @@
 #define Key_State_Down		(0x01<<4)		// 1. 有按键被按下
 
 /* DataType Define */
-#define DataType_Key	(0x10)
+#define DataType_Key	(0x01)
 
 
 typedef struct

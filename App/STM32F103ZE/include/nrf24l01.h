@@ -57,7 +57,7 @@
 #define nRF_State_RX_OK		(0x01<<3)		// 1. 接收数据成功
 
 /* DataType Define */
-#define DataType_Key	(0x10)
+#define DataType_Key	(0x01)			// Key Control cmd
 
 typedef struct
 {

@@ -85,7 +85,8 @@ uint8_t nRF_Start_Tx(void)
 {
 	BaseType_t uxBits;
 	uint8_t status;
-	const TickType_t xTicksToWait = 10;		// Time Out 3ms
+	const TickType_t xTicksToWait = 3;		// Time Out 3ms
+	uint8_t RetValue = 0;
 	
 	// Entry TX Mode to Send Data
 	nRF_TX_Mode();
@@ -104,45 +105,47 @@ uint8_t nRF_Start_Tx(void)
 
 	if (uxBits & nRF_State_TX_OK)
 	{
-		nRF_RX_Mode();
-		return nRF_TX_OK;
+		RetValue = nRF_TX_OK;
 	}
 	else if ( uxBits & nRF_State_TX_MAX)
 	{
 		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 		nRF_CSN_HIGH();
-		return nRF_MAX_TX;
+		RetValue = nRF_MAX_TX;
 	}
 	else
 	{
 		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 		nRF_CSN_HIGH();
-		return nRF_TIMEOUT;
+		RetValue = nRF_TIMEOUT;
 	}
+	nRF_RX_Mode();
+	return RetValue;
 }
 
 uint8_t nRF_Start_Rx(void)
 {
 	BaseType_t uxBits;
 	uint8_t status;
-	const TickType_t xTickToWait = 10;		// Time Out 3ms
+	const TickType_t xTickToWait = 3;		// Time Out 3ms
+	uint8_t RetValue = 0;
 
 	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_RX_OK, pdTRUE, pdFALSE, xTickToWait);
 
 	if (uxBits & nRF_State_RX_OK)
 	{
-		nRF_TX_Mode();
-		return nRF_RX_OK;
+		RetValue = nRF_RX_OK;
 	}
 	else
 	{
 		nRF_CSN_LOW();
 		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
 		nRF_CSN_HIGH();
-		return nRF_TIMEOUT;
+		RetValue = nRF_TIMEOUT;
 	}
+	return RetValue;
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)

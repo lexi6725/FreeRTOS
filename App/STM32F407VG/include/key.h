@@ -29,14 +29,15 @@
 #define KEY_SCAN_FREQ				500
 
 /* KeyStatus Flag */
-#define KeyStatus_K2				(0x01<<0)
-#define KeyStatus_K3				(0x01<<1)
-#define KeyStatus_LEFT				(0x01<<2)
-#define KeyStatus_UP				(0x01<<3)
-#define KeyStatus_DOWN				(0x01<<4)
-#define KeyStatus_K1				(0x01<<5)
-#define KeyStatus_SEL				(0x01<<6)
-#define KeyStatus_RIGHT				(0x01<<7)
+#define KEY_BRK				(0x01<<0)
+#define KEY_SPD				(0x01<<1)
+#define KEY_LEFT			(0x01<<2)
+#define KEY_UP				(0x01<<3)
+#define KEY_DOWN			(0x01<<4)
+#define KEY_Fn				(0x01<<5)
+#define KEY_SEL				(0x01<<6)
+#define KEY_RIGHT			(0x01<<7)
+
 
 void vStartKeyTasks( UBaseType_t uxPriority );
 uint8_t Get_Key_Status(void);

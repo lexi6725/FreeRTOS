@@ -55,6 +55,9 @@ void PWM_TIM_Config(PWM_Rate_Type rate)
 	htim4.Init.CounterMode	= TIM_COUNTERMODE_UP;
 	htim4.Init.ClockDivision= TIM_CLOCKDIVISION_DIV1;
 	HAL_TIM_PWM_Init(&htim4);
+	
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
 
 	sMasterConfig.MasterOutputTrigger	= TIM_TRGO_RESET;
 	sMasterConfig.MasterSlaveMode		= TIM_MASTERSLAVEMODE_DISABLE;
@@ -86,7 +89,7 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 	if (ctr->type&0xF0 != DataType_Key)
 		return HAL_ERROR;
 
-	if (ctr->data[0] &(DIR_UP|Key_K1) == (DIR_UP|Key_K1))
+	if (ctr->data[0] & KEY_SPD)
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
@@ -94,15 +97,15 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 		pwm_rate.right_rate += PWM_PERIOD/20;
 		PWM_TIM_Config(pwm_rate);
 	}
-	else if (ctr->data[0] & (DIR_DOWN|Key_K1) == (DIR_DOWN|Key_K1))
+	else if (ctr->data[0] & KEY_DOWN)
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
-		pwm_rate.left_rate -= PWM_PERIOD/20;
-		pwm_rate.right_rate -= PWM_PERIOD/20;
-		PWM_TIM_Config(pwm_rate);
+		//pwm_rate.left_rate -= PWM_PERIOD/20;
+		//pwm_rate.right_rate -= PWM_PERIOD/20;
+		//PWM_TIM_Config(pwm_rate);
 	}
-	else if(ctr->data[0] & (DIR_LEFT|Key_K1) == (DIR_LEFT|Key_K1))
+	else if(ctr->data[0] & KEY_LEFT)
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
@@ -112,7 +115,7 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 			pwm_rate.left_rate = pwm_rate.right_rate;
 		PWM_TIM_Config(pwm_rate);
 	}
-	else if(ctr->data[0] & (DIR_RIGHT|Key_K1) == (DIR_RIGHT|Key_K1))
+	else if(ctr->data[0] & KEY_RIGHT)
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_RESET);
@@ -122,7 +125,7 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 			pwm_rate.left_rate = pwm_rate.right_rate;
 		PWM_TIM_Config(pwm_rate);
 	}
-	else if (ctr->data[0] & DIR_UP)
+	else if (ctr->data[0] & KEY_UP)
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
@@ -132,7 +135,7 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 			pwm_rate.left_rate = pwm_rate.right_rate;
 		PWM_TIM_Config(pwm_rate);
 	}
-	else if (ctr->data[0] & DIR_DOWN)
+	else if (ctr->data[0] & (KEY_SPD|KEY_Fn) == (KEY_SPD|KEY_Fn))
 	{
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_RESET);
@@ -142,21 +145,7 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 			pwm_rate.left_rate = pwm_rate.right_rate;
 		PWM_TIM_Config(pwm_rate);
 	}
-	else if (ctr->data[0] & DIR_LEFT)
-	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_SET);
-		pwm_rate.left_rate -= PWM_PERIOD/20;
-		PWM_TIM_Config(pwm_rate);
-	}
-	else if (ctr->data[0] & DIR_RIGHT)
-	{
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_LEFT_PIN, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(PWM_CTR_GPIO_PORT, PWM_CTR_RIGHT_PIN, GPIO_PIN_RESET);
-		pwm_rate.right_rate -= PWM_PERIOD/20;
-		PWM_TIM_Config(pwm_rate);
-	}
-	else if (ctr->data[0] & Key_K2)
+	else if (ctr->data[0] & KEY_BRK)
 	{
 		if (pwmState & PWM_START)
 		{
