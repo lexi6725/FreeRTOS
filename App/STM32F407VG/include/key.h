@@ -26,7 +26,7 @@
 #define KEY_K123_CLK_DISABLE()		__GPIOC_CLK_DISABLE()
 #define KEYNUMPC					6
 
-#define KEY_SCAN_FREQ				500
+#define KEY_SCAN_FREQ				200
 
 /* KeyStatus Flag */
 #define KEY_BRK				(0x01<<0)

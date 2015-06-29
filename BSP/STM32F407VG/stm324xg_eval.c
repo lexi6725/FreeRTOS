@@ -1356,10 +1356,6 @@ uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t Buffe
 	return status;
 }
 
-#if defined(JOY_BUTTON_MODULE)
-
-#endif
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == nRF_IRQ_PIN)
