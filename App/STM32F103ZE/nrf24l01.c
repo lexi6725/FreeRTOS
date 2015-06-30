@@ -85,7 +85,7 @@ uint8_t nRF_Start_Tx(void)
 {
 	BaseType_t uxBits;
 	uint8_t status;
-	const TickType_t xTicksToWait = 3;		// Time Out 3ms
+	const TickType_t xTicksToWait = 5;		// Time Out 3ms
 	uint8_t RetValue = 0;
 	
 	// Entry TX Mode to Send Data
@@ -129,7 +129,7 @@ uint8_t nRF_Start_Rx(void)
 {
 	BaseType_t uxBits;
 	uint8_t status;
-	const TickType_t xTickToWait = 3;		// Time Out 3ms
+	const TickType_t xTickToWait = 5;		// Time Out 3ms
 	uint8_t RetValue = 0;
 
 	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_RX_OK, pdTRUE, pdFALSE, xTickToWait);

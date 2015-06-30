@@ -63,7 +63,7 @@ void nRF_TX_Mode(void)
 
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_AA, 0x01);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_RXADDR, 0x01);
-	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_SETUP_RETR, 0x0A);
+	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_SETUP_RETR, 0x03);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RF_CH, 40);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RF_SETUP, 0x0F);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_RX_PW_P0, nRF_RX_PLOAD_WIDTH);
@@ -83,7 +83,7 @@ void nRF_TX_Mode(void)
 uint8_t nRF_Start_Tx(void)
 {
 	BaseType_t uxBits;
-	const TickType_t xTicksToWait = 3;		// Time Out 3ms
+	const TickType_t xTicksToWait = 5;		// Time Out 3ms
 	uint8_t RetValue = 0;
 	
 	// Entry TX Mode to Send Data
@@ -126,7 +126,7 @@ uint8_t nRF_Start_Tx(void)
 uint8_t nRF_Start_Rx(void)
 {
 	BaseType_t uxBits;
-	const TickType_t xTickToWait = 3;		// Time Out 3ms
+	const TickType_t xTickToWait = 5;		// Time Out 3ms
 	uint8_t RetValue = 0;
 
 	uxBits = xEventGroupWaitBits(xEventGruop, nRF_State_RX_OK, pdTRUE, pdFALSE, xTickToWait);
@@ -237,7 +237,7 @@ BaseType_t	Event_Status = 0;
 		}
 		
 		memset(&nRF_Buf, 0, sizeof(nRF_Tx_DataType));
-		vTaskDelayUntil( &xLastTime, xRate );
+		//vTaskDelayUntil( &xLastTime, xRate );
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 
