@@ -37,8 +37,8 @@
 #define KEY_SEL				(0x01<<6)
 #define KEY_RIGHT			(0x01<<7)
 
-#define KEY_SPD_ADD			(KEY_SPD)
-#define KEY_SPD_RDC			(KEY_Fn|KEY_SPD)
+#define KEY_SPD_ADD			(KEY_Fn|KEY_UP)
+#define KEY_SPD_RDC			(KEY_Fn|KEY_DOWN)
 
 typedef struct
 {
