@@ -320,12 +320,12 @@ typedef enum
 /**
   * @brief  M25P nRF SPI Control Interface pins
   */
-#define nRF_SPI_CS_PIN							GPIO_PIN_4        /* PA.04*/
+#define nRF_SPI_CS_PIN							GPIO_PIN_3        /* PA.03*/
 #define nRF_SPI_CS_GPIO_PORT					GPIOA
 #define nRF_SPI_CS_GPIO_CLK_ENABLE()			__HAL_RCC_GPIOA_CLK_ENABLE()
 #define nRF_SPI_CS_GPIO_CLK_DISABLE()			__HAL_RCC_GPIOA_CLK_DISABLE()
 
-#define nRF_CSN_PIN								GPIO_PIN_3        /* PA.08*/
+#define nRF_CSN_PIN								GPIO_PIN_4        /* PA.04*/
 #define nRF_CSN_GPIO_PORT						GPIOA
 #define nRF_CSN_GPIO_CLK_ENABLE()				__HAL_RCC_GPIOA_CLK_ENABLE()
 #define nRF_CSN_GPIO_CLK_DISABLE()				__HAL_RCC_GPIOA_CLK_DISABLE()
