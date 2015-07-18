@@ -589,47 +589,57 @@ static void FSMC_BANK1NORSRAM4_MspInit(void)
   */
 static void FSMC_BANK1NORSRAM4_Init(void) 
 {  
-  SRAM_HandleTypeDef          hsram;
-  FSMC_NORSRAM_TimingTypeDef  sramtiming = {0};
-  
-  /*** Configure the SRAM Bank 4 ***/  
-  /* Configure IPs */
-  hsram.Instance  = FSMC_NORSRAM_DEVICE;
-  hsram.Extended  = FSMC_NORSRAM_EXTENDED_DEVICE;
+	SRAM_HandleTypeDef          hsram;
+	FSMC_NORSRAM_TimingTypeDef  readsramtiming = {0};
+	FSMC_NORSRAM_TimingTypeDef  writesramtiming = {0};
 
-  sramtiming.AddressSetupTime       = 1;
-  sramtiming.AddressHoldTime        = 1;
-  sramtiming.DataSetupTime          = 2;
-  sramtiming.BusTurnAroundDuration  = 1;
-  sramtiming.CLKDivision            = 2;
-  sramtiming.DataLatency            = 2;
-  sramtiming.AccessMode             = FSMC_ACCESS_MODE_A;
-  
-  /* Color LCD configuration
-     LCD configured as follow:
-        - Data/Address MUX = Disable
-        - Memory Type = SRAM
-        - Data Width = 16bit
-        - Write Operation = Enable
-        - Extended Mode = Enable
-        - Asynchronous Wait = Disable */
-  hsram.Init.NSBank             = FSMC_NORSRAM_BANK4;
-  hsram.Init.DataAddressMux     = FSMC_DATA_ADDRESS_MUX_DISABLE;
-  hsram.Init.MemoryType         = FSMC_MEMORY_TYPE_SRAM;
-  hsram.Init.MemoryDataWidth    = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
-  hsram.Init.BurstAccessMode    = FSMC_BURST_ACCESS_MODE_DISABLE;
-  hsram.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
-  hsram.Init.WrapMode           = FSMC_WRAP_MODE_DISABLE;
-  hsram.Init.WaitSignalActive   = FSMC_WAIT_TIMING_BEFORE_WS;
-  hsram.Init.WriteOperation     = FSMC_WRITE_OPERATION_ENABLE;
-  hsram.Init.WaitSignal         = FSMC_WAIT_SIGNAL_DISABLE;
-  hsram.Init.ExtendedMode       = FSMC_EXTENDED_MODE_DISABLE;
-  hsram.Init.AsynchronousWait   = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
-  hsram.Init.WriteBurst         = FSMC_WRITE_BURST_DISABLE;
+	/*** Configure the SRAM Bank 4 ***/  
+	/* Configure IPs */
+	hsram.Instance  = FSMC_NORSRAM_DEVICE;
+	hsram.Extended  = FSMC_NORSRAM_EXTENDED_DEVICE;
 
-  /* Initialize the SRAM controller */
-  FSMC_BANK1NORSRAM4_MspInit();
-  HAL_SRAM_Init(&hsram, &sramtiming, &sramtiming);   
+	__HAL_RCC_FSMC_CLK_ENABLE();
+	readsramtiming.AddressSetupTime       = 1;
+	readsramtiming.AddressHoldTime        = 1;
+	readsramtiming.DataSetupTime          = 15;
+	readsramtiming.BusTurnAroundDuration  = 0;
+	readsramtiming.CLKDivision            = 0;
+	readsramtiming.DataLatency            = 0;
+	readsramtiming.AccessMode             = FSMC_ACCESS_MODE_A;
+	
+	writesramtiming.AddressSetupTime       = 2;
+	writesramtiming.AddressHoldTime        = 0;
+	writesramtiming.DataSetupTime          = 5;
+	writesramtiming.BusTurnAroundDuration  = 0;
+	writesramtiming.CLKDivision            = 0;
+	writesramtiming.DataLatency            = 0;
+	writesramtiming.AccessMode             = FSMC_ACCESS_MODE_A;
+
+	/* Color LCD configuration
+	 LCD configured as follow:
+	    - Data/Address MUX = Disable
+	    - Memory Type = SRAM
+	    - Data Width = 16bit
+	    - Write Operation = Enable
+	    - Extended Mode = Enable
+	    - Asynchronous Wait = Disable */
+	hsram.Init.NSBank             = FSMC_NORSRAM_BANK4;
+	hsram.Init.DataAddressMux     = FSMC_DATA_ADDRESS_MUX_DISABLE;
+	hsram.Init.MemoryType         = FSMC_MEMORY_TYPE_SRAM;
+	hsram.Init.MemoryDataWidth    = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
+	hsram.Init.BurstAccessMode    = FSMC_BURST_ACCESS_MODE_DISABLE;
+	hsram.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
+	hsram.Init.WrapMode           = FSMC_WRAP_MODE_DISABLE;
+	hsram.Init.WaitSignalActive   = FSMC_WAIT_TIMING_BEFORE_WS;
+	hsram.Init.WriteOperation     = FSMC_WRITE_OPERATION_ENABLE;
+	hsram.Init.WaitSignal         = FSMC_WAIT_SIGNAL_DISABLE;
+	hsram.Init.ExtendedMode       = FSMC_EXTENDED_MODE_DISABLE;
+	hsram.Init.AsynchronousWait   = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
+	hsram.Init.WriteBurst         = FSMC_WRITE_BURST_DISABLE;
+
+	/* Initialize the SRAM controller */
+	FSMC_BANK1NORSRAM4_MspInit();
+	HAL_SRAM_Init(&hsram, &readsramtiming, &writesramtiming);   
 }
 
 /**

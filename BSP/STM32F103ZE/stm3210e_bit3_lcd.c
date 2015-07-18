@@ -63,13 +63,13 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm3210e_eval_lcd.h"
-#include "../../../Utilities/Fonts/fonts.h"
-#include "../../../Utilities/Fonts/font24.c"
-#include "../../../Utilities/Fonts/font20.c"
-#include "../../../Utilities/Fonts/font16.c"
-#include "../../../Utilities/Fonts/font12.c"
-#include "../../../Utilities/Fonts/font8.c"
+#include "stm3210e_bit3_lcd.h"
+#include "../../../libs/Fonts/fonts.h"
+//#include "../../../libs/Fonts/font24.c"
+//#include "../../../libs/Fonts/font20.c"
+//#include "../../../libs/Fonts/font16.c"
+#include "../../../libs/Fonts/font12.c"
+//#include "../../../libs/Fonts/font8.c"
 
 /** @addtogroup BSP
   * @{
@@ -143,23 +143,14 @@ static void LCD_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, u
 uint8_t BSP_LCD_Init(void)
 { 
   uint8_t ret = LCD_ERROR;
+  uint16_t DeviceID = 0;
   
   /* Default value for draw propriety */
   DrawProp.BackColor = 0xFFFF;
-  DrawProp.pFont     = &Font24;
+  DrawProp.pFont     = &Font12;
   DrawProp.TextColor = 0x0000;
   
-  if(hx8347d_drv.ReadID() == HX8347D_ID)
-  {
-    lcd_drv = &hx8347d_drv;
-    ret = LCD_OK;
-  }
-  else if(spfd5408_drv.ReadID() == SPFD5408_ID)
-  {
-    lcd_drv = &spfd5408_drv;
-    ret = LCD_OK;
-  }
-  else if(ili9320_drv.ReadID() == ILI9320_ID)
+  if((DeviceID = ili9320_drv.ReadID()) == ILI9320_ID)
   {
     lcd_drv = &ili9320_drv;
     LCD_SwapXY = 1;
@@ -715,10 +706,10 @@ void BSP_LCD_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pBmp)
   
   /* Remap Ypos, hx8347d works with inverted X in case of bitmap */
   /* X = 0, cursor is on Bottom corner */
-  if(lcd_drv == &hx8347d_drv)
-  {
-    Ypos = BSP_LCD_GetYSize() - Ypos - height;
-  }
+  //if(lcd_drv == &hx8347d_drv)
+  //{
+  //  Ypos = BSP_LCD_GetYSize() - Ypos - height;
+  //}
 
   LCD_SetDisplayWindow(Ypos, Xpos, width, height);
   

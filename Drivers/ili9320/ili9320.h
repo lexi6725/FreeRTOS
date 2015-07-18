@@ -73,7 +73,7 @@
 /** 
   * @brief  ILI9320 ID  
   */  
-#define  ILI9320_ID    0x9320
+#define  ILI9320_ID    0x1505
    
 /** 
   * @brief  ILI9320 Size  

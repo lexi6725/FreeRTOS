@@ -53,11 +53,11 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm3210e_eval.h" 
-#include "../Components/hx8347d/hx8347d.h"
-#include "../Components/spfd5408/spfd5408.h"
-#include "../Components/ili9320/ili9320.h"
-#include "../../../Utilities/Fonts/fonts.h"
+#include "stm3210e_bit3.h" 
+//#include "../Components/hx8347d/hx8347d.h"
+//#include "../Components/spfd5408/spfd5408.h"
+#include "ili9320.h"
+#include "fonts.h"
 
 /** @addtogroup STM3210E_EVAL_LCD
   * @{
@@ -138,7 +138,7 @@ typedef enum
 /** 
   * @brief LCD default font 
   */ 
-#define LCD_DEFAULT_FONT         Font24
+#define LCD_DEFAULT_FONT         Font12
 
 /**
   * @}

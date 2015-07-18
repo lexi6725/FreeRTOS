@@ -305,6 +305,8 @@
           <state>$PROJ_DIR$\..\..\App\STM32F103ZE\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+          <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
@@ -569,6 +571,8 @@
           <state>$PROJ_DIR$\..\..\App\STM32F103ZE\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+          <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
           <state>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\Include</state>
@@ -1933,44 +1937,14 @@
     <file>
       <name>$PROJ_DIR$\..\..\BSP\STM32F103ZE\stm3210e_bit3.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\BSP\STM32F103ZE\stm3210e_bit3_lcd.c</name>
+    </file>
   </group>
   <group>
     <name>Drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_cortex.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_dma.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio_ex.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_i2c.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc_ex.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_spi.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim_ex.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_uart.c</name>
+      <name>$PROJ_DIR$\..\..\Drivers\ili9320\ili9320.c</name>
     </file>
   </group>
   <group>
@@ -2011,21 +1985,72 @@
   </group>
   <group>
     <name>Libs</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcBase.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcHardwarePort.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernel.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernelPort.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcUser.c</name>
-    </file>
+    <group>
+      <name>Fonts</name>
+    </group>
+    <group>
+      <name>HAL</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_cortex.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_dma.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio_ex.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_i2c.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc_ex.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_spi.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_sram.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim_ex.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_uart.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_ll_fsmc.c</name>
+      </file>
+    </group>
+    <group>
+      <name>Trace</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcBase.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcHardwarePort.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernel.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcKernelPort.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\libs\FreeRTOS-Plus-Trace\trcUser.c</name>
+      </file>
+    </group>
   </group>
 </project>
 

@@ -151,6 +151,7 @@ int main( void )
 	ctr.data[0] = (KEY_UP);
 	//PWM_Ctr_Dir(&ctr);
 	UART_Init(115200);
+	BSP_LCD_Init();
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
