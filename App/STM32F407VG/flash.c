@@ -91,6 +91,7 @@
 #include "stm324xg_eval.h"
 #include "flash.h"
 #include "serial.h"
+#include "stm324xg_eval_lcd.h"
 
 #define ledSTACK_SIZE		30//configMINIMAL_STACK_SIZE
 #define ledNUMBER_OF_LEDS	( 1 )
@@ -113,7 +114,7 @@ BaseType_t xLEDTask;
 	for( xLEDTask = 0; xLEDTask < ledNUMBER_OF_LEDS; ++xLEDTask )
 	{
 		/* Spawn the task. */
-		xTaskCreate( vLEDFlashTask, "LEDx", ledSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
+		xTaskCreate( vLEDFlashTask, "LEDx", ledSTACK_SIZE*4, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -140,6 +141,12 @@ UBaseType_t uxLED;
 	xFlashRate = ledFLASH_RATE_BASE + ( ledFLASH_RATE_BASE * ( TickType_t ) uxLED );
 	xFlashRate /= portTICK_PERIOD_MS;
 
+	/*BSP_LCD_Clear(LCD_COLOR_WHITE);
+	BSP_LCD_SetBackColor(LCD_COLOR_BLUE);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DrawCircle(120, 160,100);
+	BSP_LCD_DisplayStringAt(0,60,"FreeRTOS", CENTER_MODE);*/
+
 	/* We will turn the LED on and off again in the delay period, so each
 	delay is only half the total period. */
 	xFlashRate /= ( TickType_t ) 2;
@@ -153,10 +160,12 @@ UBaseType_t uxLED;
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( (Led_TypeDef)uxLED );
+		//BSP_LCD_DisplayStringAt(0,90,"LED On ", CENTER_MODE);
 
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( (Led_TypeDef)uxLED );
+		//BSP_LCD_DisplayStringAt(0,90,"LED Off", CENTER_MODE);
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

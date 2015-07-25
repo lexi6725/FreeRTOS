@@ -91,6 +91,7 @@
 #include "stm3210e_bit3.h"
 #include "flash.h"
 #include "serial.h"
+#include "stm3210e_bit3_lcd.h"
 
 #define ledSTACK_SIZE		configMINIMAL_STACK_SIZE
 #define ledNUMBER_OF_LEDS	( 1 )
@@ -113,7 +114,7 @@ BaseType_t xLEDTask;
 	for( xLEDTask = 0; xLEDTask < ledNUMBER_OF_LEDS; ++xLEDTask )
 	{
 		/* Spawn the task. */
-		xTaskCreate( vLEDFlashTask, "LEDx", ledSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
+		xTaskCreate( vLEDFlashTask, "LEDx", ledSTACK_SIZE*4, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -147,16 +148,23 @@ UBaseType_t uxLED;
 	/* We need to initialise xLastFlashTime prior to the first call to 
 	vTaskDelayUntil(). */
 	xLastFlashTime = xTaskGetTickCount();
+	BSP_LCD_Clear(LCD_COLOR_WHITE);
+	BSP_LCD_SetBackColor(LCD_COLOR_RED);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
+	BSP_LCD_DrawCircle(150, 120,100);
+	BSP_LCD_DisplayStringAt(0, 60,"FreeRTOS", CENTER_MODE);
 
 	for(;;)
 	{
 		/* Delay for half the flash period then turn the LED on. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( uxLED );
+		BSP_LCD_DisplayStringAt(0, 90,"LED ON ",CENTER_MODE);
 
 		/* Delay for half the flash period then turn the LED off. */
 		vTaskDelayUntil( &xLastFlashTime, xFlashRate );
 		BSP_LED_Toggle( uxLED );
+		BSP_LCD_DisplayStringAt(0,90,"LED OFF",CENTER_MODE);
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

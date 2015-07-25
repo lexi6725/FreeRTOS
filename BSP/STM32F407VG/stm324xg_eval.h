@@ -371,6 +371,9 @@ void             BSP_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart);
 uint8_t          BSP_JOY_Init(JOYMode_TypeDef Joy_Mode);
 JOYState_TypeDef BSP_JOY_GetState(void);
 
+
+void LCD_IO_Init(void);
+
 /**
   * @}
   */

@@ -143,6 +143,7 @@ int main( void )
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
 	UART_Init(115200);
+	//BSP_LCD_Init();
 
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	vStartnRFTasks(mainRF_TASK_PRIORITY);

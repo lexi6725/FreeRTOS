@@ -49,6 +49,7 @@
 //#include "stm324xg_eval_io.h"
 #include "FreeRTOS.h"
 #include "nrf24l01.h"
+#include "ili9320.h"
 
 /** @addtogroup BSP
   * @{
@@ -90,8 +91,10 @@ typedef struct
                                              |(__STM324xG_EVAL_BSP_VERSION_SUB2 << 8 )\
                                              |(__STM324xG_EVAL_BSP_VERSION_RC))
                                               
-#define FMC_BANK3_BASE  ((uint32_t)(0x60000000 | 0x08000000))
-#define FMC_BANK3       ((LCD_CONTROLLER_TypeDef *) FMC_BANK3_BASE)
+#define FMC_BANK1_BASE  ((uint32_t)(0x60000000))
+//#define FMC_BANK1       ((LCD_CONTROLLER_TypeDef *) FMC_BANK1_BASE)
+#define FMC_BANK1_RAM		*(__IO uint16_t *)((uint32_t)(FMC_BANK1_BASE + (1<<19)))
+#define FMC_BANK1_REG		*(__IO uint16_t *)((uint32_t)(FMC_BANK1_BASE))
 
 #define I2C_TIMEOUT  100 /*<! Value of Timeout when I2C communication fails */
 
@@ -833,7 +836,7 @@ static void SPIx_Error (void)
 }
 
 
-#if 0
+
 /*************************** FSMC Routines ************************************/
 /**
   * @brief  Initializes FSMC_BANK3 MSP.
@@ -855,33 +858,21 @@ static void FSMC_BANK3_MspInit(void)
   
   /* Common GPIO configuration */
   GPIO_Init_Structure.Mode      = GPIO_MODE_AF_PP;
-  GPIO_Init_Structure.Pull      = GPIO_PULLUP;
+  GPIO_Init_Structure.Pull      = GPIO_NOPULL;
   GPIO_Init_Structure.Speed     = GPIO_SPEED_HIGH;
   GPIO_Init_Structure.Alternate = GPIO_AF12_FSMC;
   
   /* GPIOD configuration */
-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_8     |\
-                              GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 |\
-                              GPIO_PIN_14 | GPIO_PIN_15;
+  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7     |\
+                              GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
    
   HAL_GPIO_Init(GPIOD, &GPIO_Init_Structure);
 
   /* GPIOE configuration */  
-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_3| GPIO_PIN_4 | GPIO_PIN_7     |\
-                              GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 |\
-                              GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+  GPIO_Init_Structure.Pin   = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 |\
+                              GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+                              
   HAL_GPIO_Init(GPIOE, &GPIO_Init_Structure);
-  
-  /* GPIOF configuration */  
-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2| GPIO_PIN_3 | GPIO_PIN_4     |\
-                              GPIO_PIN_5 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-  HAL_GPIO_Init(GPIOF, &GPIO_Init_Structure);
-  
-  /* GPIOG configuration */  
-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2| GPIO_PIN_3 | GPIO_PIN_4     |\
-                              GPIO_PIN_5 | GPIO_PIN_10;
-  
-  HAL_GPIO_Init(GPIOG, &GPIO_Init_Structure);  
 }
 
 /**
@@ -892,22 +883,30 @@ static void FSMC_BANK3_MspInit(void)
 static void FSMC_BANK3_Init(void) 
 {  
   SRAM_HandleTypeDef hsram;
-  FSMC_NORSRAM_TimingTypeDef SRAM_Timing;
+  FSMC_NORSRAM_TimingTypeDef ReadSRAM_Timing, WriteSRAM_Timing;
   
   /*** Configure the SRAM Bank 3 ***/  
   /* Configure IPs */
   hsram.Instance  = FMC_NORSRAM_DEVICE;
   hsram.Extended  = FMC_NORSRAM_EXTENDED_DEVICE;
 
-  SRAM_Timing.AddressSetupTime      = 5;
-  SRAM_Timing.AddressHoldTime       = 1;
-  SRAM_Timing.DataSetupTime         = 9;
-  SRAM_Timing.BusTurnAroundDuration = 0;
-  SRAM_Timing.CLKDivision           = 2;
-  SRAM_Timing.DataLatency           = 2;
-  SRAM_Timing.AccessMode            = FSMC_ACCESS_MODE_A;
+  ReadSRAM_Timing.AddressSetupTime      = 15;
+  ReadSRAM_Timing.AddressHoldTime       = 15;
+  ReadSRAM_Timing.DataSetupTime         = 15;
+  ReadSRAM_Timing.BusTurnAroundDuration = 0;
+  ReadSRAM_Timing.CLKDivision           = 3;
+  ReadSRAM_Timing.DataLatency           = 2;
+  ReadSRAM_Timing.AccessMode            = FSMC_ACCESS_MODE_A;
   
-  hsram.Init.NSBank             = FSMC_NORSRAM_BANK3;
+  WriteSRAM_Timing.AddressSetupTime      = 15;
+  WriteSRAM_Timing.AddressHoldTime       = 15;
+  WriteSRAM_Timing.DataSetupTime         = 15;
+  WriteSRAM_Timing.BusTurnAroundDuration = 0;
+  WriteSRAM_Timing.CLKDivision           = 3;
+  WriteSRAM_Timing.DataLatency           = 2;
+  WriteSRAM_Timing.AccessMode            = FSMC_ACCESS_MODE_A;
+  
+  hsram.Init.NSBank             = FSMC_NORSRAM_BANK1;
   hsram.Init.DataAddressMux     = FSMC_DATA_ADDRESS_MUX_DISABLE;
   hsram.Init.MemoryType         = FSMC_MEMORY_TYPE_SRAM;
   hsram.Init.MemoryDataWidth    = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
@@ -923,7 +922,7 @@ static void FSMC_BANK3_Init(void)
 
   /* Initialize the SRAM controller */
   FSMC_BANK3_MspInit();
-  HAL_SRAM_Init(&hsram, &SRAM_Timing, &SRAM_Timing);   
+  HAL_SRAM_Init(&hsram, &ReadSRAM_Timing, &WriteSRAM_Timing);   
 }
 
 /**
@@ -934,7 +933,7 @@ static void FSMC_BANK3_Init(void)
 static void FSMC_BANK3_WriteData(uint16_t Data) 
 {
   /* Write 16-bit Reg */
-  FMC_BANK3->RAM = Data;
+  FMC_BANK1_RAM = Data;
 }
 
 /**
@@ -945,7 +944,7 @@ static void FSMC_BANK3_WriteData(uint16_t Data)
 static void FSMC_BANK3_WriteReg(uint8_t Reg) 
 {
   /* Write 16-bit Index, then write register */
-  FMC_BANK3->REG = Reg;
+  FMC_BANK1_REG = Reg;
 }
 
 /**
@@ -953,11 +952,15 @@ static void FSMC_BANK3_WriteReg(uint8_t Reg)
   * @param  None
   * @retval Read value
   */
-static uint16_t FSMC_BANK3_ReadData(void) 
+static uint16_t FSMC_BANK3_ReadData(uint8_t Reg) 
 {
-  return FMC_BANK3->RAM;
-}
+	/* Write 16-bit Index (then Read Reg) */
+	FMC_BANK1_REG = Reg;
 
+	/* Read 16-bit Reg */
+	return FMC_BANK1_RAM;
+}
+#if 0
 /*******************************************************************************
                             LINK OPERATIONS
 *******************************************************************************/
@@ -1029,7 +1032,7 @@ void IOE_Delay(uint32_t Delay)
 {
   HAL_Delay(Delay);
 }
-
+#endif
 /********************************* LINK LCD ***********************************/
 
 /**
@@ -1039,10 +1042,40 @@ void IOE_Delay(uint32_t Delay)
   */
 void LCD_IO_Init(void) 
 {
-  if(Is_LCD_IO_Initialized == 0)
+	uint16_t Device_Code;
+	
+	if(Is_LCD_IO_Initialized == 0)
+	{
+		Is_LCD_IO_Initialized = 1; 
+		FSMC_BANK3_Init();
+	}
+	Device_Code = ili9320_ReadID();
+	if (Device_Code == 0x1505)
+	{
+		ili9320_Init();
+	}
+}
+
+/**
+  * @brief  Writes multiple data on LCD data register.
+  * @param  pData: Data to be written
+  * @param  Size: number of data to write
+  * @retval None
+  */
+void LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size)
+{
+  uint32_t counter = 0;
+  uint16_t regvalue;
+  
+  regvalue = *pData | (*(pData+1) << 8);
+
+  for (counter = Size; counter != 0; counter--)
   {
-    Is_LCD_IO_Initialized = 1; 
-    FSMC_BANK3_Init();
+    /* Write 16-bit Reg */
+    FSMC_BANK3_WriteData(regvalue);
+    counter--;
+    pData += 2;
+    regvalue = *pData | (*(pData+1) << 8);
   }
 }
 
@@ -1053,8 +1086,8 @@ void LCD_IO_Init(void)
   */
 void LCD_IO_WriteData(uint16_t Data) 
 {
-  /* Write 16-bit Reg */
-  FSMC_BANK3_WriteData(Data);
+	/* Write 16-bit Reg */
+	FSMC_BANK3_WriteData(Data);
 }
 
 /**
@@ -1064,8 +1097,8 @@ void LCD_IO_WriteData(uint16_t Data)
   */
 void LCD_IO_WriteReg(uint8_t Reg) 
 {
-  /* Write 16-bit Index, then Write Reg */
-  FSMC_BANK3_WriteReg(Reg);
+	/* Write 16-bit Index, then Write Reg */
+	FSMC_BANK3_WriteReg(Reg);
 }
 
 /**
@@ -1073,11 +1106,11 @@ void LCD_IO_WriteReg(uint8_t Reg)
   * @param  None
   * @retval Read data.
   */
-uint16_t LCD_IO_ReadData(void) 
+uint16_t LCD_IO_ReadData(uint16_t Reg) 
 {
-  return FSMC_BANK3_ReadData();
+	return FSMC_BANK3_ReadData(Reg);
 }
-
+#if 0
 /********************************* LINK AUDIO *********************************/
 /**
   * @brief  Initializes Audio low level.

@@ -223,7 +223,7 @@ BaseType_t	Event_Status = 0;
 			nRF_Buf.data[0] = Get_Key_Status();
 		}
 
-		if (Event_Status)
+		if (Event_Status&Key_State_Down)
 		{
 			if (nRF_Start_Tx() == nRF_TX_OK)
 			{

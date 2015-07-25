@@ -63,12 +63,12 @@
     
 /* Includes ------------------------------------------------------------------*/
 #include "stm324xg_eval_lcd.h"
-#include "../../../Utilities/Fonts/fonts.h"
-#include "../../../Utilities/Fonts/font24.c"
-#include "../../../Utilities/Fonts/font20.c"
-#include "../../../Utilities/Fonts/font16.c"
-#include "../../../Utilities/Fonts/font12.c"
-#include "../../../Utilities/Fonts/font8.c"
+#include "../../libs/Fonts/fonts.h"
+//#include "../../libs/Fonts/font24.c"
+//#include "../../libs/Fonts/font20.c"
+//#include "../../libs/Fonts/font16.c"
+#include "../../libs/Fonts/font12.c"
+//#include "../../libs/Fonts/font8.c"
 
 /** @addtogroup BSP
   * @{
@@ -140,12 +140,12 @@ uint8_t BSP_LCD_Init(void)
   
   /* Default value for draw propriety */
   DrawProp.BackColor = 0xFFFF;
-  DrawProp.pFont     = &Font24;
+  DrawProp.pFont     = &Font12;
   DrawProp.TextColor = 0x0000;
   
-  if(ili9325_drv.ReadID() == ILI9325_ID)
+  if(ili9320_drv.ReadID() == ILI9320_ID)
   {
-    lcd_drv = &ili9325_drv;
+    lcd_drv = &ili9320_drv;
 
     /* LCD Init */   
     lcd_drv->Init();
@@ -563,21 +563,21 @@ void BSP_LCD_DrawCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius)
   
   while (CurX <= CurY)
   {
-    BSP_LCD_DrawPixel((Xpos + CurX), (Ypos - CurY), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos + CurX), (Xpos - CurY), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos - CurX), (Ypos - CurY), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos - CurX), (Xpos - CurY), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos + CurY), (Ypos - CurX), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos + CurY), (Xpos - CurX), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos - CurY), (Ypos - CurX), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos - CurY), (Xpos - CurX), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos + CurX), (Ypos + CurY), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos + CurX), (Xpos + CurY), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos - CurX), (Ypos + CurY), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos - CurX), (Xpos + CurY), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos + CurY), (Ypos + CurX), DrawProp.TextColor);
+    BSP_LCD_DrawPixel((Ypos + CurY), (Xpos + CurX), DrawProp.TextColor);
 
-    BSP_LCD_DrawPixel((Xpos - CurY), (Ypos + CurX), DrawProp.TextColor);   
+    BSP_LCD_DrawPixel((Ypos - CurY), (Xpos + CurX), DrawProp.TextColor);   
 
     /* Initialize the font */
     BSP_LCD_SetFont(&LCD_DEFAULT_FONT);

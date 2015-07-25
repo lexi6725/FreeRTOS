@@ -1,0 +1,365 @@
+diff --git a/App/STM32F103ZE/include/stm32f1xx_hal_conf.h b/App/STM32F103ZE/include/stm32f1xx_hal_conf.h
+index 5b479cc..b2d570d 100644
+--- a/App/STM32F103ZE/include/stm32f1xx_hal_conf.h
++++ b/App/STM32F103ZE/include/stm32f1xx_hal_conf.h
+@@ -76,9 +76,9 @@
+ /* #define HAL_SD_MODULE_ENABLED */
+ /* #define HAL_SMARTCARD_MODULE_ENABLED */
+ #define HAL_SPI_MODULE_ENABLED
+-/* #define HAL_SRAM_MODULE_ENABLED */
++#define HAL_SRAM_MODULE_ENABLED
+ #define HAL_TIM_MODULE_ENABLED
+- #define HAL_UART_MODULE_ENABLED
++#define HAL_UART_MODULE_ENABLED
+ /* #define HAL_USART_MODULE_ENABLED */
+ /* #define HAL_WWDG_MODULE_ENABLED */
+ 
+diff --git a/App/STM32F407VG/main.c b/App/STM32F407VG/main.c
+index 44e35f1..7c158fb 100644
+--- a/App/STM32F407VG/main.c
++++ b/App/STM32F407VG/main.c
+@@ -143,6 +143,7 @@ int main( void )
+ 	BSP_LED_Init(LED3);
+ 	BSP_LED_Init(LED4);
+ 	UART_Init(115200);
++	LCD_IO_Init();
+ 
+ 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
+ 	vStartnRFTasks(mainRF_TASK_PRIORITY);
+diff --git a/BSP/STM32F407VG/stm324xg_eval.c b/BSP/STM32F407VG/stm324xg_eval.c
+index 4359c69..0e73ea0 100644
+--- a/BSP/STM32F407VG/stm324xg_eval.c
++++ b/BSP/STM32F407VG/stm324xg_eval.c
+@@ -49,6 +49,7 @@
+ //#include "stm324xg_eval_io.h"
+ #include "FreeRTOS.h"
+ #include "nrf24l01.h"
++#include "ili9320.h"
+ 
+ /** @addtogroup BSP
+   * @{
+@@ -90,8 +91,8 @@ typedef struct
+                                              |(__STM324xG_EVAL_BSP_VERSION_SUB2 << 8 )\
+                                              |(__STM324xG_EVAL_BSP_VERSION_RC))
+                                               
+-#define FMC_BANK3_BASE  ((uint32_t)(0x60000000 | 0x08000000))
+-#define FMC_BANK3       ((LCD_CONTROLLER_TypeDef *) FMC_BANK3_BASE)
++#define FMC_BANK1_BASE  ((uint32_t)(0x60000000))
++#define FMC_BANK1       ((LCD_CONTROLLER_TypeDef *) FMC_BANK1_BASE)
+ 
+ #define I2C_TIMEOUT  100 /*<! Value of Timeout when I2C communication fails */
+ 
+@@ -833,7 +834,7 @@ static void SPIx_Error (void)
+ }
+ 
+ 
+-#if 0
++
+ /*************************** FSMC Routines ************************************/
+ /**
+   * @brief  Initializes FSMC_BANK3 MSP.
+@@ -860,28 +861,16 @@ static void FSMC_BANK3_MspInit(void)
+   GPIO_Init_Structure.Alternate = GPIO_AF12_FSMC;
+   
+   /* GPIOD configuration */
+-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_8     |\
+-                              GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 |\
+-                              GPIO_PIN_14 | GPIO_PIN_15;
++  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7     |\
++                              GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+    
+   HAL_GPIO_Init(GPIOD, &GPIO_Init_Structure);
+ 
+   /* GPIOE configuration */  
+-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_3| GPIO_PIN_4 | GPIO_PIN_7     |\
+-                              GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 |\
+-                              GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
++  GPIO_Init_Structure.Pin   = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 |\
++                              GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
++                              
+   HAL_GPIO_Init(GPIOE, &GPIO_Init_Structure);
+-  
+-  /* GPIOF configuration */  
+-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2| GPIO_PIN_3 | GPIO_PIN_4     |\
+-                              GPIO_PIN_5 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+-  HAL_GPIO_Init(GPIOF, &GPIO_Init_Structure);
+-  
+-  /* GPIOG configuration */  
+-  GPIO_Init_Structure.Pin   = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2| GPIO_PIN_3 | GPIO_PIN_4     |\
+-                              GPIO_PIN_5 | GPIO_PIN_10;
+-  
+-  HAL_GPIO_Init(GPIOG, &GPIO_Init_Structure);  
+ }
+ 
+ /**
+@@ -907,7 +896,7 @@ static void FSMC_BANK3_Init(void)
+   SRAM_Timing.DataLatency           = 2;
+   SRAM_Timing.AccessMode            = FSMC_ACCESS_MODE_A;
+   
+-  hsram.Init.NSBank             = FSMC_NORSRAM_BANK3;
++  hsram.Init.NSBank             = FSMC_NORSRAM_BANK1;
+   hsram.Init.DataAddressMux     = FSMC_DATA_ADDRESS_MUX_DISABLE;
+   hsram.Init.MemoryType         = FSMC_MEMORY_TYPE_SRAM;
+   hsram.Init.MemoryDataWidth    = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
+@@ -934,7 +923,7 @@ static void FSMC_BANK3_Init(void)
+ static void FSMC_BANK3_WriteData(uint16_t Data) 
+ {
+   /* Write 16-bit Reg */
+-  FMC_BANK3->RAM = Data;
++  FMC_BANK1->RAM = Data;
+ }
+ 
+ /**
+@@ -945,7 +934,7 @@ static void FSMC_BANK3_WriteData(uint16_t Data)
+ static void FSMC_BANK3_WriteReg(uint8_t Reg) 
+ {
+   /* Write 16-bit Index, then write register */
+-  FMC_BANK3->REG = Reg;
++  FMC_BANK1->REG = Reg;
+ }
+ 
+ /**
+@@ -953,11 +942,15 @@ static void FSMC_BANK3_WriteReg(uint8_t Reg)
+   * @param  None
+   * @retval Read value
+   */
+-static uint16_t FSMC_BANK3_ReadData(void) 
++static uint16_t FSMC_BANK3_ReadData(uint8_t Reg) 
+ {
+-  return FMC_BANK3->RAM;
+-}
++	/* Write 16-bit Index (then Read Reg) */
++	FMC_BANK1->REG = Reg;
+ 
++	/* Read 16-bit Reg */
++	return FMC_BANK1->RAM;
++}
++#if 0
+ /*******************************************************************************
+                             LINK OPERATIONS
+ *******************************************************************************/
+@@ -1029,7 +1022,7 @@ void IOE_Delay(uint32_t Delay)
+ {
+   HAL_Delay(Delay);
+ }
+-
++#endif
+ /********************************* LINK LCD ***********************************/
+ 
+ /**
+@@ -1039,10 +1032,40 @@ void IOE_Delay(uint32_t Delay)
+   */
+ void LCD_IO_Init(void) 
+ {
+-  if(Is_LCD_IO_Initialized == 0)
++	uint16_t Device_Code;
++	
++	if(Is_LCD_IO_Initialized == 0)
++	{
++		Is_LCD_IO_Initialized = 1; 
++		FSMC_BANK3_Init();
++	}
++	Device_Code = ili9320_ReadID();
++	if (Device_Code == 0x1505)
++	{
++		ili9320_Init();
++	}
++}
++
++/**
++  * @brief  Writes multiple data on LCD data register.
++  * @param  pData: Data to be written
++  * @param  Size: number of data to write
++  * @retval None
++  */
++void LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size)
++{
++  uint32_t counter = 0;
++  uint16_t regvalue;
++  
++  regvalue = *pData | (*(pData+1) << 8);
++
++  for (counter = Size; counter != 0; counter--)
+   {
+-    Is_LCD_IO_Initialized = 1; 
+-    FSMC_BANK3_Init();
++    /* Write 16-bit Reg */
++    FSMC_BANK3_WriteData(regvalue);
++    counter--;
++    pData += 2;
++    regvalue = *pData | (*(pData+1) << 8);
+   }
+ }
+ 
+@@ -1053,8 +1076,8 @@ void LCD_IO_Init(void)
+   */
+ void LCD_IO_WriteData(uint16_t Data) 
+ {
+-  /* Write 16-bit Reg */
+-  FSMC_BANK3_WriteData(Data);
++	/* Write 16-bit Reg */
++	FSMC_BANK3_WriteData(Data);
+ }
+ 
+ /**
+@@ -1064,8 +1087,8 @@ void LCD_IO_WriteData(uint16_t Data)
+   */
+ void LCD_IO_WriteReg(uint8_t Reg) 
+ {
+-  /* Write 16-bit Index, then Write Reg */
+-  FSMC_BANK3_WriteReg(Reg);
++	/* Write 16-bit Index, then Write Reg */
++	FSMC_BANK3_WriteReg(Reg);
+ }
+ 
+ /**
+@@ -1073,11 +1096,11 @@ void LCD_IO_WriteReg(uint8_t Reg)
+   * @param  None
+   * @retval Read data.
+   */
+-uint16_t LCD_IO_ReadData(void) 
++uint16_t LCD_IO_ReadData(uint16_t Reg) 
+ {
+-  return FSMC_BANK3_ReadData();
++	return FSMC_BANK3_ReadData(Reg);
+ }
+-
++#if 0
+ /********************************* LINK AUDIO *********************************/
+ /**
+   * @brief  Initializes Audio low level.
+diff --git a/BSP/STM32F407VG/stm324xg_eval.h b/BSP/STM32F407VG/stm324xg_eval.h
+index 56367df..2a3f6d5 100644
+--- a/BSP/STM32F407VG/stm324xg_eval.h
++++ b/BSP/STM32F407VG/stm324xg_eval.h
+@@ -371,6 +371,9 @@ void             BSP_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart);
+ uint8_t          BSP_JOY_Init(JOYMode_TypeDef Joy_Mode);
+ JOYState_TypeDef BSP_JOY_GetState(void);
+ 
++
++void LCD_IO_Init(void);
++
+ /**
+   * @}
+   */
+diff --git a/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_conf.h b/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_conf.h
+index 72a81d5..a783eff 100644
+--- a/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_conf.h
++++ b/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_conf.h
+@@ -67,7 +67,7 @@
+ /*#define HAL_NAND_MODULE_ENABLED*/
+ /*#define HAL_NOR_MODULE_ENABLED*/
+ /*#define HAL_PCCARD_MODULE_ENABLED*/
+-/*#define HAL_SRAM_MODULE_ENABLED*/
++#define HAL_SRAM_MODULE_ENABLED
+ /*#define HAL_SDRAM_MODULE_ENABLED*/
+ /*#define HAL_HASH_MODULE_ENABLED  */
+ #define HAL_GPIO_MODULE_ENABLED
+diff --git a/PRJS/STM32F407VG/stm32f407vg.ewp b/PRJS/STM32F407VG/stm32f407vg.ewp
+index 1f3ebd6..bd86914 100644
+--- a/PRJS/STM32F407VG/stm32f407vg.ewp
++++ b/PRJS/STM32F407VG/stm32f407vg.ewp
+@@ -143,7 +143,7 @@
+         <option>
+           <name>GBECoreSlave</name>
+           <version>21</version>
+-          <state>39</state>
++          <state>40</state>
+         </option>
+         <option>
+           <name>OGUseCmsis</name>
+@@ -304,6 +304,7 @@
+           <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+           <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+           <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
++          <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+           <state>$PROJ_DIR$\..\..\include</state>
+           <state>$PROJ_DIR$\..\..\Kernel\include</state>
+           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
+@@ -568,6 +569,7 @@
+           <state>$PROJ_DIR$\..\..\BSP\STM32F407VG</state>
+           <state>$PROJ_DIR$\..\..\App\STM32F407VG\include</state>
+           <state>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Inc</state>
++          <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+           <state>$PROJ_DIR$\..\..\include</state>
+           <state>$PROJ_DIR$\..\..\Kernel\include</state>
+           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM4F</state>
+@@ -1945,33 +1947,51 @@
+   </group>
+   <group>
+     <name>Drivers</name>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c</name>
+-    </file>
+-    <file>
+-      <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c</name>
+-    </file>
++    <group>
++      <name>drv</name>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\ili9320\ili9320.c</name>
++      </file>
++    </group>
++    <group>
++      <name>stm32lib</name>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_sram.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_fmc.c</name>
++      </file>
++      <file>
++        <name>$PROJ_DIR$\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_fsmc.c</name>
++      </file>
++    </group>
+   </group>
+   <group>
+     <name>Kernel</name>

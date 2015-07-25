@@ -10,7 +10,7 @@
 #include "key.h"
 #include "nrf24l01.h"
 
-static uint16_t KeyPinC[KEYNUMPC] = {
+static uint16_t const KeyPinC[KEYNUMPC] = {
 	KEY_K2_PIN,
 	KEY_K3_PIN,
 	JOY_LEFT_PIN,
@@ -19,12 +19,13 @@ static uint16_t KeyPinC[KEYNUMPC] = {
 	KEY_K1_PIN
 };
 
-static uint16_t KeyPinA[KEYNUMPA] = {
+static uint16_t const KeyPinA[KEYNUMPA] = {
 	JOY_SEL_PIN,
 	JOY_RIGHT_PIN
 };
 
 static uint8_t KeyStatus = 0;
+static uint8_t key_count[8];
 
 extern EventGroupHandle_t xEventGruop;;
 
@@ -53,6 +54,8 @@ void Key_Init(void)
 	gpioinitstruct.Speed	= GPIO_SPEED_HIGH;
 	gpioinitstruct.Mode		= GPIO_MODE_INPUT;
 	HAL_GPIO_Init(JOY_LEFT_UP_DOWN_GPIO_PORT, &gpioinitstruct);
+
+	memset(key_count, 0, 8);
 }
 
 void Key_Scan(void)
@@ -65,19 +68,21 @@ void Key_Scan(void)
 	{
 		if (HAL_GPIO_ReadPin(KEY_K123_GPIO, KeyPinC[index]) == GPIO_PIN_RESET)
 		{
-			if(!(KeyStatus&(0x01<<index)))
+			if(!(KeyStatus&(0x01<<index)) && key_count[index]++ >= 2)
 			{
 				KeyStatus |= (0x01<<index);
 				if (index < (KEYNUMPC-1))	// K1作为功能键，激发第二功能
 					flag = 1;
+				key_count[index] = 0;
 			}
 		}
 		else
 		{
-			if (KeyStatus & (0x01<<index))
+			if (KeyStatus & (0x01<<index) && key_count[index]++ >= 1)
 			{
 				KeyStatus &= ~(0x01<<index);
 				//flag = 1;
+				key_count[index] = 0;
 			}
 		}
 	}
@@ -87,18 +92,20 @@ void Key_Scan(void)
 	{
 		if (HAL_GPIO_ReadPin(JOY_SEL_RIGHT_GPIO_PORT, KeyPinA[index]) == GPIO_PIN_RESET)
 		{
-			if (!(KeyStatus & (0x01<<(index+KEYNUMPC))))
+			if (!(KeyStatus & (0x01<<(index+KEYNUMPC))) && key_count[index+KEYNUMPC]++>=2)
 			{
 				KeyStatus |= (0x01<<(index+KEYNUMPC));
 				flag = 1;
+				key_count[index+KEYNUMPC] = 0;
 			}
 		}
 		else
 		{
-			if (KeyStatus & (0x01<<(index+KEYNUMPC)))
+			if (KeyStatus & (0x01<<(index+KEYNUMPC)) && key_count[index+KEYNUMPC]++>1)
 			{
 				KeyStatus &= ~(0x01<<(index+KEYNUMPC));
 				//flag = 1;
+				key_count[index+KEYNUMPC] = 0;
 			}
 		}
 	}

@@ -46,8 +46,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm324xg_eval.h" 
-#include "../Components/ili9325/ili9325.h"
-#include "../../../Utilities/Fonts/fonts.h"
+#include "ili9320.h"
+#include "../../../libs/Fonts/fonts.h"
 
 /** @addtogroup BSP
   * @{
@@ -132,7 +132,7 @@ typedef enum
 /** 
   * @brief LCD default font 
   */ 
-#define LCD_DEFAULT_FONT         Font24
+#define LCD_DEFAULT_FONT         Font12
 
 /**
   * @}
