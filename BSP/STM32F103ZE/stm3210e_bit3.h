@@ -382,7 +382,7 @@ typedef enum
    Make sure that this define is not already declared in other files (ie. 
    stm3210e_eval.h file). It can be used in parallel by other modules. */
 #ifndef BSP_I2C_SPEED
- #define BSP_I2C_SPEED                            100000
+ #define BSP_I2C_SPEED                            400000
 #endif /* I2C_SPEED */
 
 
@@ -487,11 +487,12 @@ void                    BSP_COM_Init(COM_TypeDef COM, UART_HandleTypeDef* huart)
 uint8_t                 BSP_JOY_Init(JOYMode_TypeDef Joy_Mode);
 JOYState_TypeDef        BSP_JOY_GetState(void);
 
-uint16_t HMC5883L_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
-void HMC5883L_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length);
-void HMC5883L_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length);
-void HMC5883L_IO_Init(void);
+uint16_t I2C1_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
+void I2C1_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length);
+void I2C1_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length);
+void I2C1_IO_Init(void);
 
+void HMC5883L_IO_Init(void);
 
 
 /**

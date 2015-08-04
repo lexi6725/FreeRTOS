@@ -2,6 +2,8 @@
 #define	__HMC5883L_H_
 #include "stm32f1xx_hal_def.h"
 
+#define HMC5883L_SlaveAddr	0x3C
+
 typedef struct
 {
 	uint8_t REG_A;
@@ -11,15 +13,27 @@ typedef struct
 
 typedef struct
 {
-	int16_t	x;
-	int16_t	y;
-	int16_t	z;
-	int16_t	angle;
-}HMC_Measure;
+	int16_t x;
+	int16_t y;
+	int16_t z;
+} direct_t;
 
-extern void HMC5883L_Init(uint16_t DeviceAddr);
-extern uint8_t HMC5883L_IsReady(uint16_t DeviceAddr, uint32_t Trials);
-extern uint8_t HMC5883L_ReadStatus(uint16_t DeviceAddr);
-extern uint8_t HMC5883L_ReadDst(uint16_t DeviceAddr, uint8_t DstAddr);
-extern void HMC5883L_ReadAngle(uint16_t DeviceAddr, HMC_Measure *xValue);
+typedef struct
+{
+	float x;
+	float y;
+	float z;
+} angle_t;
+
+typedef struct
+{
+	direct_t direct;
+	angle_t angle;
+}HMC_Data_t;
+
+void HMC5883L_Init(void);
+uint8_t HMC5883L_IsReady(uint32_t Trials);
+uint8_t HMC5883L_ReadStatus(void);
+uint8_t HMC5883L_ReadDst(uint8_t DstAddr);
+uint8_t HMC5883L_ReadAngle(HMC_Data_t *xValue);
 #endif

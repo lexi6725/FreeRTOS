@@ -25,14 +25,20 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "stm32f1xx_it.h"
 #include "stm32f1xx_hal.h"
+#include "FreeRTOS.h"
+#include "event_groups.h"
+
 //#include "cmsis_os.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+extern void HMC5883L_ISR(void);
+extern void nRF_ISR(void);
+extern void MPU9050_ISR(void);
+extern void xPortSysTickHandler( void );
 /* Private functions ---------------------------------------------------------*/
 
 /******************************************************************************/
@@ -134,6 +140,35 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief  EXTI line detection callback
+  * @param GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == GPIO_PIN_1)
+		MPU9050_ISR();
+	else if (GPIO_Pin == GPIO_PIN_2)
+		nRF_ISR();
+	else if (GPIO_Pin == GPIO_PIN_8)
+		HMC5883L_ISR();
+}
+
+/**
+* @brief This function handles EXTI line1 interrupt.
+*/
+void EXTI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI1_IRQn 0 */
+
+  /* USER CODE END EXTI1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+  /* USER CODE BEGIN EXTI1_IRQn 1 */
+
+  /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
   * @brief  This function handles EXTI2 interrupt request.
   * @param  None
   * @retval None
@@ -141,6 +176,20 @@ void USART1_IRQHandler(void)
 void EXTI2_IRQHandler(void)
 {
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
+
+/**
+* @brief This function handles EXTI line[9:5] interrupts.
+*/
+void EXTI9_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+  /* USER CODE END EXTI9_5_IRQn 1 */
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

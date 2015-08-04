@@ -7,7 +7,8 @@
 #define PWM_MIN_RATE	10
 
 #define PWM_START		(0x01<<0)
-#define PWM_DOWN		(0x01<<0)
+#define PWM_DOWN		(0x01<<1)
+#define PWM_INIT		(0x01<<7)
 
 #define PWM_LEFT_PIN		GPIO_PIN_8
 #define PWM_RITHT_PIN		GPIO_PIN_9

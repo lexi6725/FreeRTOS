@@ -85,7 +85,6 @@
 
 /* Demo application includes. */
 #include "serial.h"
-#include "main.h"
 /*-----------------------------------------------------------*/
 
 /* Misc defines. */
@@ -94,10 +93,6 @@
 #define serTX_BLOCK_TIME				( 10 / portTICK_PERIOD_MS )
 
 /*-----------------------------------------------------------*/
-
-/* The queue used to hold received characters. */
-static QueueHandle_t xRxedChars;
-static QueueHandle_t xCharsForTx;
 
 UART_HandleTypeDef	UartHandle;
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
@@ -156,10 +151,20 @@ void UART_Init(uint32_t baudrate)
 
 void UART_PutString(uint8_t *pBuf, uint8_t DataLen)
 {
-	HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen);
+	uint32_t timeout = 0xFF;
+	while (timeout--)
+	{
+		if (HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen) == HAL_OK)
+			break;
+	}
 }
 
 void UART_GetString(uint8_t *pBuf, uint8_t DataLen)
 {
-	HAL_UART_Receive_IT(&UartHandle, pBuf, DataLen);
+	uint32_t timeout = 0xFF;
+	while (timeout--)
+	{
+		if (HAL_UART_Receive_IT(&UartHandle, pBuf, DataLen) == HAL_OK)
+			break;
+	}
 }

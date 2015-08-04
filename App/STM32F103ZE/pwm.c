@@ -34,12 +34,17 @@ void PWM_GPIO_Init(void)
 	GPIO_InitStructure.Pull		= GPIO_NOPULL;
 	GPIO_InitStructure.Speed	= GPIO_SPEED_HIGH;
 	HAL_GPIO_Init(PWM_CTR_GPIO_PORT, &GPIO_InitStructure);
+
+	pwmState |= PWM_INIT;
 }
 
 void PWM_TIM_Config(PWM_Rate_Type rate)
 {
 	TIM_MasterConfigTypeDef sMasterConfig;
 	TIM_OC_InitTypeDef sConfigOC;
+
+	if (!pwmState&PWM_INIT)
+		PWM_GPIO_Init();
 
 	if (rate.left_rate > PWM_PERIOD)
 		rate.left_rate = PWM_PERIOD;
@@ -89,6 +94,9 @@ uint8_t PWM_Ctr_Dir(PWM_Ctr_Type* ctr)
 {
 	if (ctr->type != DataType_Key)
 		return HAL_ERROR;
+
+	if (!pwmState&PWM_INIT)
+		PWM_GPIO_Init();
 
 	if ((ctr->data[0] & KEY_SPD_RDC) == (KEY_SPD_RDC))
 	{

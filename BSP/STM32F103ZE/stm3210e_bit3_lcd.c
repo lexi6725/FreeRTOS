@@ -143,14 +143,13 @@ static void LCD_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, u
 uint8_t BSP_LCD_Init(void)
 { 
   uint8_t ret = LCD_ERROR;
-  uint16_t DeviceID = 0;
   
   /* Default value for draw propriety */
   DrawProp.BackColor = 0xFFFF;
   DrawProp.pFont     = &Font12;
   DrawProp.TextColor = 0x0000;
   
-  if((DeviceID = ili9320_drv.ReadID()) == ILI9320_ID)
+  if(ili9320_drv.ReadID() == ILI9320_ID)
   {
     lcd_drv = &ili9320_drv;
     LCD_SwapXY = 1;

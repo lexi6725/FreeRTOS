@@ -107,6 +107,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "event_groups.h"
 #include "main.h"
 
 /* Library includes. */
@@ -121,20 +122,23 @@
 #include "pwm.h"
 #include "serial.h"
 #include "nrf24l01.h"
+#include "mpu9050.h"
 
 /* Task priorities. */
 #define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
 #define mainRF_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
 
 static portTASK_FUNCTION_PROTO( vHMC5883LTask, pvParameters );
+static portTASK_FUNCTION_PROTO( vMPU9050Task, pvParameters );
 
 /*-----------------------------------------------------------*/
 void SystemClock_Config(void);
 
+// EventGroup
+EventGroupHandle_t xEventGruop = NULL;
+
 int main( void )
 {
-	PWM_Rate_Type rate;
-	PWM_Ctr_Type ctr;
 #ifdef DEBUG
   debug();
 #endif
@@ -144,21 +148,25 @@ int main( void )
 	BSP_LED_Init(LED2);
 	//xSerialPortInitMinimal(115200, 20);
 	PWM_GPIO_Init();
-	rate.left_rate	= 50;
-	rate.right_rate = 50;
-	PWM_TIM_Config(rate);
-	ctr.type = DataType_Key;
-	ctr.data[0] = (KEY_UP);
-	//PWM_Ctr_Dir(&ctr);
 	UART_Init(115200);
-	BSP_LCD_Init();
+	//BSP_LCD_Init();
+	//MPU9050_Init();
 
-	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
-	xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
-	vStartnRFTasks(mainRF_TASK_PRIORITY);
-	
-	/* Start the scheduler. */
-	vTaskStartScheduler();
+	if ((xEventGruop = xEventGroupCreate()) != NULL)
+	{
+		vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
+		xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
+		//xTaskCreate( vMPU9050Task, "MPU", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
+		vStartnRFTasks(mainRF_TASK_PRIORITY);
+		
+		/* Start the scheduler. */
+		vTaskStartScheduler();
+	}
+	else
+	{
+		BSP_LED_On(LED2);
+		while(1);
+	}
 
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
@@ -216,104 +224,79 @@ void SystemClock_Config(void)
 static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
 {
 	TickType_t xRate, xLastTime;
-	uint8_t isConnect = 0;
-	HMC_Measure Measure_data;
-	uint8_t buf[12];
-	uint16_t x, y, z;
+	uint8_t isConnect;
+	HMC_Data_t hmc_data;
 
 	/* The parameters are not used. */
 	( void ) pvParameters;
 	
-	xRate = 1000;
+	xRate = 500;
 	xRate /= portTICK_PERIOD_MS;
 	
 	/* We need to initialise xLastFlashTime prior to the first call to 
 	vTaskDelayUntil(). */
 	xLastTime = xTaskGetTickCount();
 
-	isConnect = 0;
+	isConnect = 10;
 
 	for(;;)
 	{
-		/* Delay for half the flash period then turn the LED on. */
-		vTaskDelayUntil( &xLastTime, xRate );
-		if (isConnect)
+		if (isConnect < 10)
 		{
-			HMC5883L_ReadAngle(0x3C, &Measure_data);
-
-			x = abs(Measure_data.x);
-			buf[0] = 'x';
-			buf[1] = '=';
-			if (Measure_data.x > 0)
-				buf[2] = '+';
+			if (HMC5883L_ReadAngle(&hmc_data))
+			{
+				printf("\nx: %d\ty: %d\tz: %d\t", hmc_data.direct.x, hmc_data.direct.y, hmc_data.direct.z);
+				printf("angle_x: %.2f\tangle_y: %.2f\tangle_z: %.2f\n", hmc_data.angle.x, hmc_data.angle.y, hmc_data.angle.z);
+				BSP_LED_Toggle(LED2);
+			}
 			else
-				buf[2] = '-';
-			buf[3] = (x%10000)/1000+'0';
-			buf[4] = (x%1000)/100+'0';
-			buf[5] = (x%100)/10+'0';
-			buf[6] = x%10+'0';
-			buf[7] = '\n';
-			UART_PutString(buf, 8);
-			
-			vTaskDelayUntil( &xLastTime, 2 );
-			y = abs(Measure_data.y);
-			buf[0] = 'y';
-			buf[1] = '=';
-			if (Measure_data.y > 0)
-				buf[2] = '+';
-			else
-				buf[2] = '-';
-			buf[3] = (y%10000)/1000+'0';
-			buf[4] = (y%1000)/100+'0';
-			buf[5] = (y%100)/10+'0';
-			buf[6] = y%10+'0';
-			buf[7] = '\n';
-			UART_PutString(buf, 8);
-			
-			vTaskDelayUntil( &xLastTime, 2 );
-			z = abs(Measure_data.z);
-			buf[0] = 'z';
-			buf[1] = '=';
-			if (Measure_data.z > 0)
-				buf[2] = '+';
-			else
-				buf[2] = '-';
-			buf[3] = (z%10000)/1000+'0';
-			buf[4] = (z%1000)/100+'0';
-			buf[5] = (z%100)/10+'0';
-			buf[6] = z%10+'0';
-			buf[7] = '\n';
-			UART_PutString(buf, 8);
-
-			vTaskDelayUntil( &xLastTime, 2 );
-			Measure_data.angle = (int16_t)(atan2((double)Measure_data.y,(double)Measure_data.x)*(180/3.1415926)+180);
-			memcpy(buf, "angle=", 6);
-			buf[6] = (Measure_data.angle%1000)/100+'0';
-			buf[7] = (Measure_data.angle%100)/10+'0';
-			buf[8] = (Measure_data.angle%10)+'0';
-			buf[9] = '\n';
-			buf[10] = '\n';
-			UART_PutString(buf, 11);
-			BSP_LED_Toggle(LED2);
+				isConnect++;
 		}
 		else
 		{
-			vTaskDelayUntil(&xLastTime, 1000-xRate);
-			if (HMC5883L_IsReady(0x3C, 10))
+			vTaskDelayUntil(&xLastTime, 500);
+			if (HMC5883L_IsReady(10))
 			{
-				HMC5883L_Init(0x3C);
-				isConnect = 1;
-				UART_PutString("HMC5883L Init ... \n", 19);
+				HMC5883L_Init();
+				isConnect = 0;
+				printf("HMC5883L Init ... \n");
 			}
-			UART_PutString("HMC5883L not Connect ...\n", 25);
+			printf("HMC5883L not Connect ...\n");
 		}
 	}
 }
 
 
-static void Error_Handle(void)
+static portTASK_FUNCTION( vMPU9050Task, pvParameters )
 {
-	BSP_LED_On(LED1);
+	mpu9050_t mpu9050;
+
+	/* The parameters are not used. */
+	( void ) pvParameters;
+
+	for(;;)
+	{
+		if (MPU9050_Read(&mpu9050))
+		{
+			printf("accel:\nx= %d\ny= %d\nz= %d\n", mpu9050.accel.x, mpu9050.accel.y, mpu9050.accel.z);
+			printf("gyro:\nx= %d\ny= %d\nz= %d\n", mpu9050.gyro.x, mpu9050.gyro.y, mpu9050.gyro.z);
+		}
+	}
+}
+
+int fputc(int ch, FILE *f)
+{
+	UART_PutString((uint8_t *)&ch , 1);
+	
+	return ch;
+}
+
+int GetKey(void)
+{
+	int ch;
+	UART_GetString((uint8_t *)&ch, 1);
+
+	return ch;
 }
 
 #ifdef  DEBUG

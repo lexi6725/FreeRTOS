@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "event_groups.h"
+#include "main.h"
 /* Library includes. */
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal_conf.h"
@@ -9,7 +10,7 @@
 #include "nrf24l01.h"
 #include "stm3210e_bit3.h"
 #include "pwm.h"
-
+#include "main.h"
 #include "serial.h"
 
 //#define TX_SEND
@@ -17,7 +18,6 @@
 const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 static nRF_Tx_DataType nRF_Buf;
-EventGroupHandle_t xEventGruop;
 
 uint8_t nRF_Check(void)
 {
@@ -84,7 +84,6 @@ void nRF_TX_Mode(void)
 uint8_t nRF_Start_Tx(void)
 {
 	BaseType_t uxBits;
-	uint8_t status;
 	const TickType_t xTicksToWait = 5;		// Time Out 3ms
 	uint8_t RetValue = 0;
 	
@@ -109,18 +108,17 @@ uint8_t nRF_Start_Tx(void)
 	}
 	else if ( uxBits & nRF_State_TX_MAX)
 	{
-		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
-		nRF_CSN_HIGH();
 		RetValue = nRF_MAX_TX;
 	}
 	else
 	{
-		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
-		nRF_CSN_HIGH();
 		RetValue = nRF_TIMEOUT;
 	}
+	
+	nRF_CSN_LOW();
+	nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
+	nRF_CSN_HIGH();
+	
 	nRF_RX_Mode();
 	return RetValue;
 }
@@ -128,7 +126,6 @@ uint8_t nRF_Start_Tx(void)
 uint8_t nRF_Start_Rx(void)
 {
 	BaseType_t uxBits;
-	uint8_t status;
 	const TickType_t xTickToWait = 1000;		// Time Out one second.
 	uint8_t RetValue = 0;
 
@@ -136,19 +133,21 @@ uint8_t nRF_Start_Rx(void)
 
 	if (uxBits & nRF_State_RX_OK)
 	{
+		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Buf, nRF_RX_PLOAD_WIDTH);
 		RetValue = nRF_RX_OK;
 	}
 	else
 	{
-		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
-		nRF_CSN_HIGH();
 		RetValue = nRF_TIMEOUT;
 	}
+	
+	nRF_CSN_LOW();
+	nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
+	nRF_CSN_HIGH();
 	return RetValue;
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void nRF_ISR(void)
 {
 	BaseType_t xResult, xHigherPriorityTaskWoken;
 	uint8_t RegValue;
@@ -168,10 +167,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	}
 	if (RegValue & nRF_RX_OK)
 	{
-		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Buf, nRF_RX_PLOAD_WIDTH);
-		nRF_CSN_LOW();
-		nRF_SPI_IO_WriteReg(nRF_FLUSH_RX, 0xFF);
-		nRF_CSN_HIGH();
 		xResult = xEventGroupSetBitsFromISR(xEventGruop, nRF_State_RX_OK, &xHigherPriorityTaskWoken);
 	}
 	
@@ -209,36 +204,16 @@ void vStartnRFTasks( UBaseType_t uxPriority )
 
 static portTASK_FUNCTION( vnRFTask, pvParameters )
 {
-TickType_t xRate, xLastTime;
-uint8_t	retValue = 'A';
-
 	/* The parameters are not used. */
 	( void ) pvParameters;
 
 	nRF_SPI_IO_Init();
-	xRate = 10;
-	/* We will turn the LED on and off again in the delay period, so each
-	delay is only half the total period. */
-	xRate /= ( TickType_t ) 2;
-
-	/* 创建事件以同步中断与任务*/
-	xEventGruop = xEventGroupCreate();
-
-	/* We need to initialise xLastFlashTime prior to the first call to 
-	vTaskDelayUntil(). */
-	xLastTime = xTaskGetTickCount();
 
 	nRF_RX_Mode();
-	vTaskDelay(1);
+	//vTaskDelay(1);
 	
 	for(;;)
-	{
-		if (xEventGruop == NULL)
-		{
-			xEventGruop = xEventGroupCreate();
-			continue;
-		}
-		
+	{	
 		if (nRF_Start_Rx() == nRF_RX_OK)
 		{
 			BSP_LED_Toggle(LED2);

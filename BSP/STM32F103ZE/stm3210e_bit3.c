@@ -485,6 +485,21 @@ JOYState_TypeDef BSP_JOY_GetState(void)
   return JOY_NONE;
 }
 
+void HMC5883L_IO_Init(void)
+{
+	GPIO_InitTypeDef  gpioinitstruct = {0};  
+
+	gpioinitstruct.Pin = GPIO_PIN_8;
+	gpioinitstruct.Mode = GPIO_MODE_IT_RISING;
+	gpioinitstruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &gpioinitstruct);
+	
+	/* Enable and set Eval EXTI8(PA8) Interrupt to the highest priority */
+    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+}
+
+
 #ifdef HAL_UART_MODULE_ENABLED
 /**
   * @brief  Configures COM port.
@@ -1224,7 +1239,7 @@ uint8_t nRF_SPI_IO_WriteData(uint8_t Reg, const uint8_t* pBuffer, uint32_t Buffe
   * @brief  Initializes peripherals used by the I2C  Sensor driver.
   * @retval None
   */
-void HMC5883L_IO_Init(void)
+void I2C1_IO_Init(void)
 {
   I2Cx_Init();
 }
@@ -1237,7 +1252,7 @@ void HMC5883L_IO_Init(void)
   * @param  Length: Number of data to write
   * @retval None
   */
-void HMC5883L_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length)
+void I2C1_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length)
 {
   I2Cx_WriteBuffer(DevAddress, WriteAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
@@ -1250,7 +1265,7 @@ void HMC5883L_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr,
   * @param  Length: Number of data to read
   * @retval None
   */
-void HMC5883L_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length)
+void I2C1_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length)
 {
   I2Cx_ReadBuffer(DevAddress, ReadAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
@@ -1261,7 +1276,7 @@ void HMC5883L_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, u
   * @param  Trials: Number of trials
 * @retval HAL status
 */
-uint16_t HMC5883L_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
+uint16_t I2C1_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 { 
   return (I2Cx_IsDeviceReady(DevAddress, Trials));
 }

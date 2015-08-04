@@ -70,16 +70,16 @@
         <option>
           <name>GRuntimeLibSelect</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>GRuntimeLibSelectSlave</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>RTDescription</name>
-          <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
+          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
@@ -133,7 +133,7 @@
         </option>
         <option>
           <name>RTConfigPath2</name>
-          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
+          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Full.h</state>
         </option>
         <option>
           <name>GFPUCoreSlave</name>
@@ -200,11 +200,11 @@
         </option>
         <option>
           <name>CCListAssFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCListAssSource</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCEnableRemarks</name>
@@ -277,7 +277,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IFpuProcessor</name>
@@ -306,6 +306,7 @@
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+          <state>$PROJ_DIR$\..\..\Drivers\Common</state>
           <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
@@ -572,6 +573,7 @@
           <state>$PROJ_DIR$\..\..\Drivers\STM32F1xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
+          <state>$PROJ_DIR$\..\..\Drivers\Common</state>
           <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
@@ -1945,6 +1947,9 @@
     <name>Drivers</name>
     <file>
       <name>$PROJ_DIR$\..\..\Drivers\ili9320\ili9320.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\Drivers\Common\mpu9050.c</name>
     </file>
   </group>
   <group>

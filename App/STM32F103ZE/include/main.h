@@ -51,9 +51,17 @@ extern "C" {
 #define USARTx_DMA_TX_IRQHandler	DMA1_Channel7_IRQHandler
 #define	USARTx_DMA_RX_IRQHandler	DMA1_Channel6_IRQHandler
 
+extern EventGroupHandle_t xEventGruop;
+#define nRF_State_TX_OK		(0x01<<0)		// 1. 发送数据成功
+#define nRF_State_TX_MAX	(0x01<<1)		// 1. 发送数据最大次数
+#define nRF_State_RX_OK		(0x01<<2)		// 1. 接收数据成功
+#define HMC_DATA_READY		(0x01<<3)
+#define MPU_DATA_READY		(0x01<<4)
+
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif /* __MAIN_H */
 

@@ -51,11 +51,6 @@
 #define nRF_FIFO_STATUS     0x17  //FIFO状态寄存器;bit0,RX FIFO寄存器空标志;bit1,RX FIFO满标志;bit2,3,保留
                               //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
 
-/* nRF24L01 Event Bit Map */
-#define nRF_State_TX_OK		(0x01<<1)		// 1. 发送数据成功
-#define nRF_State_TX_MAX	(0x01<<2)		// 1. 发送数据最大次数
-#define nRF_State_RX_OK		(0x01<<3)		// 1. 接收数据成功
-
 /* DataType Define */
 #define DataType_Key	(0x01)			// Key Control cmd
 
@@ -66,5 +61,4 @@ typedef struct
 } nRF_Tx_DataType;
 
 void vStartnRFTasks( UBaseType_t uxPriority );
-
 #endif
