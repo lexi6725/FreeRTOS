@@ -121,21 +121,10 @@
 #include "hmc5883l.h"
 #include "pwm.h"
 #include "serial.h"
-#include "nrf24l01.h"
-#include "mpu9050.h"
-
-/* Task priorities. */
-#define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainRF_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
-
-static portTASK_FUNCTION_PROTO( vHMC5883LTask, pvParameters );
-static portTASK_FUNCTION_PROTO( vMPU9050Task, pvParameters );
+#include "App.h"
 
 /*-----------------------------------------------------------*/
 void SystemClock_Config(void);
-
-// EventGroup
-EventGroupHandle_t xEventGruop = NULL;
 
 int main( void )
 {
@@ -146,27 +135,15 @@ int main( void )
 	SystemClock_Config();
 	BSP_LED_Init(LED1);
 	BSP_LED_Init(LED2);
-	//xSerialPortInitMinimal(115200, 20);
 	PWM_GPIO_Init();
 	UART_Init(115200);
+	nRF_SPI_IO_Init();
+	MPU_Init();
 	//BSP_LCD_Init();
-	//MPU9050_Init();
 
-	if ((xEventGruop = xEventGroupCreate()) != NULL)
-	{
-		vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
-		xTaskCreate( vHMC5883LTask, "HMC5883L", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
-		//xTaskCreate( vMPU9050Task, "MPU", configMINIMAL_STACK_SIZE, NULL, 1, ( TaskHandle_t * ) NULL );
-		vStartnRFTasks(mainRF_TASK_PRIORITY);
-		
-		/* Start the scheduler. */
-		vTaskStartScheduler();
-	}
-	else
-	{
-		BSP_LED_On(LED2);
-		while(1);
-	}
+	StartApp();
+	BSP_LED_On(LED2);
+	while(1);
 
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
@@ -221,67 +198,19 @@ void SystemClock_Config(void)
   }
 }
 
-static portTASK_FUNCTION( vHMC5883LTask, pvParameters )
+void freertos_get_ms(unsigned long *count)
 {
-	TickType_t xRate, xLastTime;
-	uint8_t isConnect;
-	HMC_Data_t hmc_data;
-
-	/* The parameters are not used. */
-	( void ) pvParameters;
-	
-	xRate = 500;
-	xRate /= portTICK_PERIOD_MS;
-	
-	/* We need to initialise xLastFlashTime prior to the first call to 
-	vTaskDelayUntil(). */
-	xLastTime = xTaskGetTickCount();
-
-	isConnect = 10;
-
-	for(;;)
-	{
-		if (isConnect < 10)
-		{
-			if (HMC5883L_ReadAngle(&hmc_data))
-			{
-				printf("\nx: %d\ty: %d\tz: %d\t", hmc_data.direct.x, hmc_data.direct.y, hmc_data.direct.z);
-				printf("angle_x: %.2f\tangle_y: %.2f\tangle_z: %.2f\n", hmc_data.angle.x, hmc_data.angle.y, hmc_data.angle.z);
-				BSP_LED_Toggle(LED2);
-			}
-			else
-				isConnect++;
-		}
-		else
-		{
-			vTaskDelayUntil(&xLastTime, 500);
-			if (HMC5883L_IsReady(10))
-			{
-				HMC5883L_Init();
-				isConnect = 0;
-				printf("HMC5883L Init ... \n");
-			}
-			printf("HMC5883L not Connect ...\n");
-		}
-	}
+	*count = (uint32_t)xTaskGetTickCount();
 }
 
-
-static portTASK_FUNCTION( vMPU9050Task, pvParameters )
-{
-	mpu9050_t mpu9050;
-
-	/* The parameters are not used. */
-	( void ) pvParameters;
-
-	for(;;)
-	{
-		if (MPU9050_Read(&mpu9050))
-		{
-			printf("accel:\nx= %d\ny= %d\nz= %d\n", mpu9050.accel.x, mpu9050.accel.y, mpu9050.accel.z);
-			printf("gyro:\nx= %d\ny= %d\nz= %d\n", mpu9050.gyro.x, mpu9050.gyro.y, mpu9050.gyro.z);
-		}
-	}
+void delay_ms(uint32_t time)
+{	 
+   uint16_t i=0;  
+   while(time--)
+   {
+	  i=12000;	//自己定义
+	  while(i--) ;	  
+   }
 }
 
 int fputc(int ch, FILE *f)

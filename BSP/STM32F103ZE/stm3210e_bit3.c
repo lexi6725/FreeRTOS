@@ -747,6 +747,11 @@ static void I2Cx_MspInit(I2C_HandleTypeDef *hi2c)
   }
 }
 
+void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
+{
+	__I2C1_CLK_DISABLE();
+	HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
+}
 /**
   * @brief Eval I2Cx Bus initialization
   * @retval None
@@ -1252,9 +1257,9 @@ void I2C1_IO_Init(void)
   * @param  Length: Number of data to write
   * @retval None
   */
-void I2C1_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length)
+uint8_t I2C1_IO_Write(uint8_t DevAddress, uint8_t WriteAddr, uint16_t Length, uint8_t* pBuffer)
 {
-  I2Cx_WriteBuffer(DevAddress, WriteAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
+	return I2Cx_WriteBuffer((uint16_t)DevAddress, WriteAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
 
 /**
@@ -1265,9 +1270,9 @@ void I2C1_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uin
   * @param  Length: Number of data to read
   * @retval None
   */
-void I2C1_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length)
+uint8_t I2C1_IO_Read(uint8_t DevAddress, uint8_t ReadAddr, uint16_t Length, uint8_t* pBuffer)
 {
-  I2Cx_ReadBuffer(DevAddress, ReadAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
+	return I2Cx_ReadBuffer((uint16_t)DevAddress, ReadAddr, I2C_MEMADD_SIZE_8BIT, pBuffer, Length);
 }
 
 /**

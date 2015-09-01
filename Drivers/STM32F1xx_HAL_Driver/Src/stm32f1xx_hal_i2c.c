@@ -1789,10 +1789,10 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
     else if(Size == 2)
     {
       /* Disable Acknowledge */
-      CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+      //CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
 
       /* Enable Pos */
-      SET_BIT(hi2c->Instance->CR1, I2C_CR1_POS);
+      //SET_BIT(hi2c->Instance->CR1, I2C_CR1_POS);
 
       /* Clear ADDR flag */
       __HAL_I2C_CLEAR_ADDRFLAG(hi2c);
@@ -1824,10 +1824,17 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
         else if(Size == 2)
         {
           /* Wait until BTF flag is set */
-          if(I2C_WaitOnFlagUntilTimeout(hi2c, I2C_FLAG_BTF, RESET, Timeout) != HAL_OK)
+          //if(I2C_WaitOnFlagUntilTimeout(hi2c, I2C_FLAG_BTF, RESET, Timeout) != HAL_OK)
+          if (I2C_WaitOnFlagUntilTimeout(hi2c, I2C_FLAG_RXNE, RESET, Timeout) != HAL_OK)
           {
             return HAL_TIMEOUT;
           }
+          
+	      /* Disable Acknowledge */
+	      CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+
+	      /* Enable Pos */
+	      SET_BIT(hi2c->Instance->CR1, I2C_CR1_POS);
 
           /* Generate Stop */
           SET_BIT(hi2c->Instance->CR1, I2C_CR1_STOP);

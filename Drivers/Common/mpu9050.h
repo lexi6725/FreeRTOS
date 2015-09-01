@@ -4,6 +4,7 @@
 //****************************************
 // 定义MPU6050内部地址
 //****************************************
+#define AUX_VDDIO		0x01
 #define	SMPLRT_DIV		0x19	//陀螺仪采样率，典型值：0x07(125Hz)
 #define	CONFIG			0x1A	//低通滤波频率，典型值：0x06(5Hz)
 #define	GYRO_CONFIG		0x1B	//陀螺仪自检及测量范围，典型值：0x18(不自检，2000deg/s)
@@ -94,9 +95,9 @@
 
 typedef struct
 {
-	uint16_t x;
-	uint16_t y;
-	uint16_t z;
+	int16_t x;
+	int16_t y;
+	int16_t z;
 } triaxial_t;
 
 typedef struct
@@ -105,5 +106,20 @@ typedef struct
 	triaxial_t gyro;
 } mpu9050_t;
 
+typedef struct
+{
+	float x;
+	float y;
+	float z;
+} triaxial_cal_t;
+
+typedef struct
+{
+	triaxial_cal_t accel;
+	triaxial_cal_t gyro;
+} mpu9050_data_t;
+
+void MPU9050_Init(void);
 uint8_t MPU9050_Read(mpu9050_t *mpu9050);
+void MPU9050_Data_Cal(mpu9050_data_t *mpu_data, mpu9050_t *mpu_orig);
 #endif

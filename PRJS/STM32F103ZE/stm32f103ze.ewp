@@ -307,6 +307,7 @@
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
           <state>$PROJ_DIR$\..\..\Drivers\Common</state>
+          <state>$PROJ_DIR$\..\..\Drivers\MPU6050\eMPL</state>
           <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
@@ -574,6 +575,7 @@
           <state>$PROJ_DIR$\..\..\include</state>
           <state>$PROJ_DIR$\..\..\Drivers\ili9320</state>
           <state>$PROJ_DIR$\..\..\Drivers\Common</state>
+          <state>$PROJ_DIR$\..\..\Drivers\MPU6050\eMPL</state>
           <state>$PROJ_DIR$\..\..\libs\Fonts</state>
           <state>$PROJ_DIR$\..\..\Kernel\include</state>
           <state>$PROJ_DIR$\..\..\Kernel\Portable\ARM_CM3</state>
@@ -1907,22 +1909,16 @@
   <group>
     <name>App</name>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\flash.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\App.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\hmc5883l.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\flash.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\main.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\nrf24l01.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\pwm.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\serial.c</name>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\mpu6050.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\App\STM32F103ZE\startup_stm32f103xe.s</name>
@@ -1946,10 +1942,28 @@
   <group>
     <name>Drivers</name>
     <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\hmc5883l.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\Drivers\ili9320\ili9320.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\Drivers\MPU6050\eMPL\inv_mpu.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\Drivers\MPU6050\eMPL\inv_mpu_dmp_motion_driver.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\Drivers\Common\mpu9050.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\nrf24l01.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\pwm.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\App\STM32F103ZE\serial.c</name>
     </file>
   </group>
   <group>

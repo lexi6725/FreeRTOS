@@ -61,4 +61,10 @@ typedef struct
 } nRF_Tx_DataType;
 
 void vStartnRFTasks( UBaseType_t uxPriority );
+uint8_t nRF_Start_Tx(uint8_t *buf, uint8_t len);
+uint8_t nRF_Start_Rx(uint8_t *buf, uint8_t len);
+uint8_t nRF_Check(void);
+void nRF_RX_Mode(void);
+void nRF_TX_Mode(void);
+
 #endif

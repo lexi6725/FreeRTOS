@@ -488,8 +488,9 @@ uint8_t                 BSP_JOY_Init(JOYMode_TypeDef Joy_Mode);
 JOYState_TypeDef        BSP_JOY_GetState(void);
 
 uint16_t I2C1_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials);
-void I2C1_IO_Read(uint16_t DevAddress, uint8_t* pBuffer, uint8_t ReadAddr, uint16_t Length);
-void I2C1_IO_Write(uint16_t DevAddress, uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Length);
+
+uint8_t I2C1_IO_Read(uint8_t DevAddress, uint8_t ReadAddr, uint16_t Length, uint8_t* pBuffer);
+uint8_t I2C1_IO_Write(uint8_t DevAddress, uint8_t WriteAddr, uint16_t Length, uint8_t* pBuffer);
 void I2C1_IO_Init(void);
 
 void HMC5883L_IO_Init(void);

@@ -2034,6 +2034,9 @@
   </group>
   <group>
     <name>Libs</name>
+    <group>
+      <name>GUI</name>
+    </group>
   </group>
 </project>
 

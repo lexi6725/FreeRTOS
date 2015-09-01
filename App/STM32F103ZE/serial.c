@@ -151,12 +151,13 @@ void UART_Init(uint32_t baudrate)
 
 void UART_PutString(uint8_t *pBuf, uint8_t DataLen)
 {
-	uint32_t timeout = 0xFF;
-	while (timeout--)
-	{
-		if (HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen) == HAL_OK)
-			break;
-	}
+	//uint32_t timeout = 0xFFFF;
+	//while (timeout--)
+	//{
+	//	if (HAL_UART_Transmit_IT(&UartHandle, pBuf, DataLen) == HAL_OK)
+	//		break;
+	//}
+	HAL_UART_Transmit(&UartHandle, pBuf, DataLen, 1);
 }
 
 void UART_GetString(uint8_t *pBuf, uint8_t DataLen)

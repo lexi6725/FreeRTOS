@@ -13,11 +13,9 @@
 #include "main.h"
 #include "serial.h"
 
-//#define TX_SEND
+extern EventGroupHandle_t xEventGruop;
 
-const uint8_t nRF_TX_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
-const uint8_t nRF_RX_ADDRESS[nRF_RX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
-static nRF_Tx_DataType nRF_Buf;
+const uint8_t nRF_ADDRESS[nRF_TX_ADR_WIDTH] = {0x59, 0x12, 0x67, 0x67, 0x25};
 
 uint8_t nRF_Check(void)
 {
@@ -38,8 +36,8 @@ void nRF_RX_Mode(void)
 	/*!< Select the nRF: Chip Select low */
 	nRF_SPI_CS_LOW();
 
-	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_TX_ADDRESS, nRF_TX_ADR_WIDTH);
-	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_RX_ADDRESS, nRF_RX_ADR_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_ADDRESS, nRF_TX_ADR_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_ADDRESS, nRF_RX_ADR_WIDTH);
 
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_AA, 0x01);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_RXADDR, 0x01);
@@ -59,8 +57,8 @@ void nRF_TX_Mode(void)
 	/*!< Select the nRF: Chip Select low */
 	nRF_CSN_LOW();
 
-	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_TX_ADDRESS, nRF_TX_ADR_WIDTH);
-	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_RX_ADDRESS, nRF_RX_ADR_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_TX_ADDR, (const uint8_t *)nRF_ADDRESS, nRF_TX_ADR_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WRITE_REG+nRF_RX_ADDR_P0, (const uint8_t *)nRF_ADDRESS, nRF_RX_ADR_WIDTH);
 
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_AA, 0x01);
 	nRF_SPI_IO_WriteReg(nRF_WRITE_REG+nRF_EN_RXADDR, 0x01);
@@ -81,7 +79,7 @@ void nRF_TX_Mode(void)
   * @param  None
   * retval   None
   */
-uint8_t nRF_Start_Tx(void)
+uint8_t nRF_Start_Tx(uint8_t *buf, uint8_t len)
 {
 	BaseType_t uxBits;
 	const TickType_t xTicksToWait = 5;		// Time Out 3ms
@@ -95,7 +93,7 @@ uint8_t nRF_Start_Tx(void)
 	
 	nRF_SPI_IO_WriteReg(nRF_FLUSH_TX, 0xFF);
 
-	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, (uint8_t *)&nRF_Buf, nRF_TX_PLOAD_WIDTH);
+	nRF_SPI_IO_WriteData(nRF_WR_TX_PLOAD, (uint8_t *)&buf, len);
 	
 	/*!< Deselect the nRF: Start Send */
 	nRF_CSN_HIGH();
@@ -123,7 +121,7 @@ uint8_t nRF_Start_Tx(void)
 	return RetValue;
 }
 
-uint8_t nRF_Start_Rx(void)
+uint8_t nRF_Start_Rx(uint8_t *buf, uint8_t len)
 {
 	BaseType_t uxBits;
 	const TickType_t xTickToWait = 1000;		// Time Out one second.
@@ -133,7 +131,7 @@ uint8_t nRF_Start_Rx(void)
 
 	if (uxBits & nRF_State_RX_OK)
 	{
-		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, (uint8_t *)&nRF_Buf, nRF_RX_PLOAD_WIDTH);
+		nRF_SPI_IO_ReadData(nRF_RD_RX_PLOAD, buf, len);
 		RetValue = nRF_RX_OK;
 	}
 	else
@@ -175,57 +173,4 @@ void nRF_ISR(void)
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
 }
-
-uint8_t CommProcess(void)
-{
-
-	switch(nRF_Buf.datatype)
-	{
-		case DataType_Key:
-			return PWM_Ctr_Dir((PWM_Ctr_Type *)&nRF_Buf);
-		default:
-			return HAL_ERROR;		
-	}
-
-	return HAL_ERROR;
-}
-
-
-/* The task that is created three times. */
-static portTASK_FUNCTION_PROTO( vnRFTask, pvParameters );
-
-/*-----------------------------------------------------------*/
-
-void vStartnRFTasks( UBaseType_t uxPriority )
-{
-	xTaskCreate( vnRFTask, "nRF", configMINIMAL_STACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
-}
-/*-----------------------------------------------------------*/
-
-static portTASK_FUNCTION( vnRFTask, pvParameters )
-{
-	/* The parameters are not used. */
-	( void ) pvParameters;
-
-	nRF_SPI_IO_Init();
-
-	nRF_RX_Mode();
-	//vTaskDelay(1);
-	
-	for(;;)
-	{	
-		if (nRF_Start_Rx() == nRF_RX_OK)
-		{
-			BSP_LED_Toggle(LED2);
-			if (CommProcess() == HAL_OK)
-			{
-				nRF_Buf.datatype |= 0x08;
-				if (nRF_Start_Tx() == nRF_TX_OK)
-				{
-					BSP_LED_Toggle(LED2);
-				}
-			}
-		}
-	}
-} /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

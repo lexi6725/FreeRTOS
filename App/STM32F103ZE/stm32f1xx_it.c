@@ -29,6 +29,7 @@
 #include "stm32f1xx_hal.h"
 #include "FreeRTOS.h"
 #include "event_groups.h"
+#include "mpu6050.h"
 
 //#include "cmsis_os.h"
 /* Private typedef -----------------------------------------------------------*/
@@ -147,7 +148,8 @@ void USART1_IRQHandler(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == GPIO_PIN_1)
-		MPU9050_ISR();
+		//MPU9050_ISR();
+		gyro_data_ready_cb();
 	else if (GPIO_Pin == GPIO_PIN_2)
 		nRF_ISR();
 	else if (GPIO_Pin == GPIO_PIN_8)
